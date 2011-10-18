@@ -88,6 +88,8 @@ or are still known to not live happily inside of OSGi framework can remain
 outside thr framework, consumed and wired in from within the container, until
 such a time as they evolve their own OSGi solutions.
 
+Licensed under the LGPL 2.1 or later (see LICENSE).
+
 Arkadiko is very small and very simple! It only comprises 5 classes in total
 (one is an exception, one is constants, one is a util class, the real work is
 done by two classes).
