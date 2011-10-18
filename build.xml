@@ -25,7 +25,9 @@
 	</target>
 
 	<target name="comile">
-		<mkdir dir="classes" />
+		<mkdir dir="classes/META-INF" />
+
+		<copy file="${project.dir}/LICENSE" todir="classes/META-INF" />
 
 		<javac
 			classpathref="lib.classpath"
