@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="arkadiko" basedir="." default="jar">
+	<property name="project.dir" value="." />
+
+	<property environment="env" />
+
+	<property file="${project.dir}/build.${user.name}.properties" />
+	<property file="${project.dir}/build.${env.COMPUTERNAME}.properties" />
+	<property file="${project.dir}/build.${env.HOST}.properties" />
+	<property file="${project.dir}/build.${env.HOSTNAME}.properties" />
+	<property file="${project.dir}/build.properties" />
+
+	<tstamp>
+		<format property="current.time" pattern="yyMMddhhmmss" />
+	</tstamp>
+
+	<path id="lib.classpath">
+		<fileset dir="${project.dir}/lib" includes="*.jar" />
+	</path>
+
+	<target name="clean">
+		<delete dir="classes" />
+		<delete dir="dist" />
+	</target>
+
+	<target name="comile">
+		<mkdir dir="classes" />
+
+		<javac
+			classpathref="lib.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="classes"
+			encoding="${javac.encoding}"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="src"
+		/>
+	</target>
+
+	<target name="jar" depends="comile">
+		<mkdir dir="dist" />
+
+		<antcall target="manifest" />
+
+		<jar
+			basedir="classes"
+			jarfile="dist/arkadiko-${bundle.version}-${current.time}.jar"
+			manifest="classes/META-INF/MANIFEST.MF"
+		/>
+	</target>
+
+	<target name="manifest">
+		<mkdir dir="classes/META-INF" />
+
+		<manifest file="classes/META-INF/MANIFEST.MF">
+			<attribute name="Bundle-ManifestVersion" value="2" />
+			<attribute name="Bundle-Name" value="Arkadiko" />
+			<attribute name="Bundle-SymbolicName" value="com.liferay.arkadiko" />
+			<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5" />
+			<attribute name="Bundle-Vendor" value="Liferay, Inc." />
+			<attribute name="Bundle-Version" value="${bundle.version}" />
+			<attribute name="Export-Package" value="com.liferay.arkadiko;version=&quot;${bundle.version}&quot;" />
+			<attribute name="Liferay-Build-Date" value="${current.time}" />
+		</manifest>
+	</target>
+</project>
