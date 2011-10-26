@@ -19,12 +19,25 @@
 		<fileset dir="${project.dir}/lib" includes="*.jar" />
 	</path>
 
+	<path id="test.classpath">
+		<path refid="lib.classpath" />
+		<fileset dir="${project.dir}/lib/test" includes="ant-junit.jar,junit.jar,org.eclipse.osgi_3.7.0.v20110613.jar" />
+		<path path="classes"/>
+	</path>
+
+	<taskdef name="junit"
+		classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
+	>
+		<classpath refid="test.classpath" />
+	</taskdef>
+
 	<target name="clean">
 		<delete dir="classes" />
+		<delete dir="test-classes" />
 		<delete dir="dist" />
 	</target>
 
-	<target name="comile">
+	<target name="compile">
 		<mkdir dir="classes/META-INF" />
 
 		<copy file="${project.dir}/LICENSE" todir="classes/META-INF" />
@@ -42,7 +55,28 @@
 		/>
 	</target>
 
-	<target name="jar" depends="comile">
+	<target name="compile-test" depends="compile">
+		<mkdir dir="test-classes" />
+
+		<path id="compile-test.classpath">
+			<path refid="test.classpath" />
+			<path path="classes"/>
+		</path>
+
+		<javac
+			classpathref="compile-test.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="test-classes"
+			encoding="${javac.encoding}"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="test"
+		/>
+	</target>
+
+	<target name="jar" depends="compile">
 		<mkdir dir="dist" />
 
 		<antcall target="manifest" />
@@ -67,5 +101,25 @@
 			<attribute name="Export-Package" value="com.liferay.arkadiko;version=&quot;${bundle.version}&quot;" />
 			<attribute name="Liferay-Build-Date" value="${current.time}" />
 		</manifest>
+	</target>
+
+	<target name="test" depends="compile,compile-test">
+		<path id="run-test.classpath">
+			<path refid="test.classpath" />
+			<path path="classes"/>
+			<path path="test-classes"/>
+			<path path="examples"/>
+		</path>
+
+		<junit  printsummary="yes" fork="yes">
+			<classpath refid="run-test.classpath" />
+
+			<batchtest fork="yes">
+				<formatter type="plain" usefile="false"/>
+				<fileset dir="test">
+					<include name="**/test/*Test*.java"/>
+				</fileset>
+			</batchtest>
+		</junit>
 	</target>
 </project>

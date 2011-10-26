@@ -1,4 +1,8 @@
+TEST*
+
 /.settings
 /bin
 /classes
+/data
 /dist
+/test-classes
