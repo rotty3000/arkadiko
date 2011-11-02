@@ -6,3 +6,6 @@ TEST*
 /data
 /dist
 /test-classes
+
+/bundles/bundle*/*.jar
+/bundles/bundle*/classes
