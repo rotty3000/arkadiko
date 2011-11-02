@@ -15,8 +15,11 @@
 package com.liferay.arkadiko.bundle.one;
 
 import aQute.bnd.annotation.component.Component;
+import aQute.bnd.annotation.component.Reference;
 
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
+
+import org.osgi.service.log.LogService;
 
 /**
  * <a href="BundleOneInterfaceOneImpl.java.html"><b><i>View Source</i></b></a>
@@ -30,7 +33,16 @@ public class BundleOneInterfaceOneImpl implements InterfaceOne {
 	 * @see com.liferay.arkadiko.test.interfaces.InterfaceOne#methodOne()
 	 */
 	public String methodOne() {
+		_log.log(LogService.LOG_INFO, getClass().getName());
+
 		return getClass().getName();
 	}
+
+	@Reference
+	public void setLog(LogService log) {
+		_log=log;
+	}
+
+	private LogService _log;
 
 }

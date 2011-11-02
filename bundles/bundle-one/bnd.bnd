@@ -1,5 +1,6 @@
 Bundle-SymbolicName: bundle-one
 Bundle-Version: 0.0.1
-Import-Package: com.liferay.arkadiko.test.interfaces
+Import-Package: com.liferay.arkadiko.test.interfaces,\
+	org.osgi.service.log
 Private-Package: com.liferay.arkadiko.bundle.one
 Service-Component: com.liferay.arkadiko.bundle.one.*
