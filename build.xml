@@ -3,37 +3,12 @@
 <project name="arkadiko" basedir="." default="jar">
 	<property name="project.dir" value="." />
 
-	<property environment="env" />
-
-	<property file="${project.dir}/build.${user.name}.properties" />
-	<property file="${project.dir}/build.${env.COMPUTERNAME}.properties" />
-	<property file="${project.dir}/build.${env.HOST}.properties" />
-	<property file="${project.dir}/build.${env.HOSTNAME}.properties" />
-	<property file="${project.dir}/build.properties" />
-
-	<tstamp>
-		<format property="current.time" pattern="yyMMddhhmmss" />
-	</tstamp>
-
-	<path id="lib.classpath">
-		<fileset dir="${project.dir}/lib" includes="*.jar" />
-	</path>
-
-	<path id="test.classpath">
-		<path refid="lib.classpath" />
-		<fileset dir="${project.dir}/lib/test" includes="ant-junit.jar,junit.jar,org.eclipse.osgi_3.7.0.v20110613.jar" />
-		<path path="classes"/>
-	</path>
-
-	<taskdef name="junit"
-		classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"
-	>
-		<classpath refid="test.classpath" />
-	</taskdef>
+	<import file="build-common.xml" />
 
 	<target name="clean">
 		<delete dir="classes" />
 		<delete dir="test-classes" />
+		<delete dir="data" />
 		<delete dir="dist" />
 	</target>
 
@@ -62,6 +37,10 @@
 			<path refid="test.classpath" />
 			<path path="classes"/>
 		</path>
+
+		<copy todir="test-classes">
+			<fileset dir="test" excludes="**/*.java" />
+		</copy>
 
 		<javac
 			classpathref="compile-test.classpath"
@@ -103,23 +82,35 @@
 		</manifest>
 	</target>
 
-	<target name="test" depends="compile,compile-test">
+	<target name="test" depends="compile,compile-test,build-bundles">
 		<path id="run-test.classpath">
 			<path refid="test.classpath" />
 			<path path="classes"/>
 			<path path="test-classes"/>
-			<path path="examples"/>
 		</path>
 
 		<junit  printsummary="yes" fork="yes">
 			<classpath refid="run-test.classpath" />
+			<sysproperty key="project.dir" value="${project.dir}" />
 
 			<batchtest fork="yes">
-				<formatter type="plain" usefile="false"/>
+				<formatter type="plain" />
 				<fileset dir="test">
 					<include name="**/test/*Test*.java"/>
 				</fileset>
 			</batchtest>
 		</junit>
 	</target>
+
+	<target name="build-bundles">
+		<for param="module.name">
+			<path>
+				<dirset dir="${project.dir}/bundles" includes="*" />
+			</path>
+			<sequential>
+				<ant dir="@{module.name}" target="jar-bundle" inheritall="false" />
+			</sequential>
+		</for>
+	</target>
+
 </project>

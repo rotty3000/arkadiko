@@ -12,25 +12,35 @@
  * details.
  */
 
-package com.liferay.arkadiko.test;
+package com.liferay.arkadiko.test.beans;
 
-import com.liferay.arkadiko.test.util.BaseTest;
-
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 
 /**
- * <a href="TestTest.java.html"><b><i>View Source</i></b></a>
+ * <a href="HasDependencyOnInterfaceOne.java.html"><b><i>View Source</i></b></a>
  *
  * @author Raymond Augé
  */
-public class BasicTest extends BaseTest {
+public class HasDependencyOnInterfaceOne {
 
-	public void test() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-			"basic-test.xml");
-
-		assertEquals(1, context.getBeanDefinitionCount());
+	public void useInterfaceOne() {
+		getInterfaceOne().methodOne();
 	}
+
+	/**
+	 * @return the interfaceOne
+	 */
+	public InterfaceOne getInterfaceOne() {
+		return _interfaceOne;
+	}
+
+	/**
+	 * @param interfaceOne the interfaceOne to set
+	 */
+	public void setInterfaceOne(InterfaceOne interfaceOne) {
+		_interfaceOne = interfaceOne;
+	}
+
+	private InterfaceOne _interfaceOne;
 
 }

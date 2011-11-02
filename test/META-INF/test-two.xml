@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<beans
+	default-destroy-method="destroy"
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+>
+	<bean class="com.liferay.arkadiko.AKBeanPostProcessor">
+		<property name="framework">
+			<bean class="com.liferay.arkadiko.test.util.FrameworkUtil" factory-method="getFramework" />
+		</property>
+	</bean>
+
+	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
+		<property name="interfaceOne">
+			<bean class="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
+		</property>
+	</bean>
+</beans>
