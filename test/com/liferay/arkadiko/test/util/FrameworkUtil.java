@@ -84,6 +84,10 @@ public class FrameworkUtil {
 			Bundle[] bundles = bundleContext.getBundles();
 
 			for (Bundle curBundle : bundles) {
+				if (curBundle.getState() == Bundle.ACTIVE) {
+					continue;
+				}
+
 				try {
 					curBundle.start();
 				}
