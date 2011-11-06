@@ -18,17 +18,13 @@ package com.liferay.arkadiko.test.util;
 import java.io.File;
 import java.io.FileInputStream;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
-import org.osgi.service.log.LogReaderService;
 
 /**
  * <a href="FrameworkUtil.java.html"><b><i>View Source</i></b></a>
@@ -37,49 +33,38 @@ import org.osgi.service.log.LogReaderService;
  */
 public class FrameworkUtil {
 
-	public static Framework getFramework() {
-		return _framework;
-	}
+	public static Framework init(Map<String, String> properties)
+		throws Exception {
 
-	public static void init() throws Exception {
 		List<FrameworkFactory> frameworkFactories = ServiceLoader.load(
 			FrameworkFactory.class);
 
 		if (frameworkFactories.isEmpty()) {
-			return;
+			return null;
 		}
 
 		FrameworkFactory frameworkFactory = frameworkFactories.get(0);
 
-		Map<String, String> properties = _buildProperties();
-
 		_framework = frameworkFactory.newFramework(properties);
+
+		System.out.println(
+			"Framework impl: " + _framework.getClass().getName());
 
 		_framework.init();
 
-		_initLogListener();
-
 		BundleContext bundleContext = _framework.getBundleContext();
 
-		String bundlePath = System.getProperty("project.dir");
+		String bundlePath = properties.get("bundle.dir");
+		String installBundles = properties.get("install.bundles");
 
-		File bundleFile = new File(
-			bundlePath + "/lib/org.eclipse.equinox.ds_1.3.0.v20110502.jar");
+		String[] bundleNames = installBundles.split(",");
 
-		Bundle bundle = bundleContext.installBundle(
-			bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
+		for (String bundleName : bundleNames) {
+			File bundleFile = new File(bundlePath + "/" + bundleName);
 
-		bundleFile = new File(
-			bundlePath + "/lib/org.eclipse.equinox.util_1.0.300.v20110502.jar");
-
-		bundleContext.installBundle(
-			bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
-
-		bundleFile = new File(
-			bundlePath + "/lib/org.eclipse.osgi.services_3.3.0.v20110513.jar");
-
-		bundleContext.installBundle(
-			bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
+			bundleContext.installBundle(
+				bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
+		}
 
 		_framework.start();
 
@@ -91,48 +76,12 @@ public class FrameworkUtil {
 				e.printStackTrace();
 			}
 		}
+
+		return _framework;
 	}
 
-	public static void stop() throws Exception {
+	public static void destroy() throws Exception {
 		_framework.stop();
-	}
-
-	protected static Map<String, String> _buildProperties() {
-		Map<String, String> properties = new HashMap<String, String>();
-
-		properties.put(
-			Constants.FRAMEWORK_BEGINNING_STARTLEVEL, String.valueOf(2));
-		properties.put(
-			Constants.FRAMEWORK_BUNDLE_PARENT,
-			Constants.FRAMEWORK_BUNDLE_PARENT_APP);
-		properties.put(Constants.FRAMEWORK_STORAGE, "data");
-
-		StringBuffer sb = new StringBuffer();
-
-		// Need to export the packages of bean interfaces we want to resolve
-		// services for from OSGi.
-
-		sb.append("com.liferay.arkadiko.test.interfaces");
-
-		properties.put(Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, sb.toString());
-
-		return properties;
-	}
-
-	private static void _initLogListener() {
-		BundleContext bundleContext = _framework.getBundleContext();
-
-		ServiceReference<LogReaderService> logReaderServiceReference =
-			bundleContext.getServiceReference(LogReaderService.class);
-
-		LogReaderService logReaderService = bundleContext.getService(
-			logReaderServiceReference);
-
-		if (logReaderService == null) {
-			return;
-		}
-
-		logReaderService.addLogListener(new LogListener());
 	}
 
 	private static Framework _framework;

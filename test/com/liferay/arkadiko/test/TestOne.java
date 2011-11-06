@@ -16,6 +16,8 @@ package com.liferay.arkadiko.test;
 
 import com.liferay.arkadiko.test.util.BaseTest;
 
+import org.osgi.framework.launch.Framework;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -30,7 +32,11 @@ public class TestOne extends BaseTest {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 			"META-INF/test-one.xml");
 
-		assertEquals(1, context.getBeanDefinitionCount());
+		assertEquals(3, context.getBeanDefinitionCount());
+
+		Framework framework = (Framework)context.getBean("framework");
+
+		assertNotNull(framework);
 	}
 
 }

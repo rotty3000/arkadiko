@@ -24,10 +24,12 @@ import junit.framework.TestCase;
  */
 public class BaseTest extends TestCase {
 
+	public String getProjectDir() {
+		return _projectDir;
+	}
+
 	@Override
 	protected void tearDown() throws Exception {
-		FrameworkUtil.stop();
-
 		super.tearDown();
 	}
 
@@ -35,7 +37,8 @@ public class BaseTest extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		FrameworkUtil.init();
+		_projectDir = System.getProperty("project.dir");
 	}
 
+	protected String _projectDir;
 }

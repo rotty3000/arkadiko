@@ -7,9 +7,30 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
 >
-	<bean class="com.liferay.arkadiko.AKBeanPostProcessor">
-		<property name="framework">
-			<bean class="com.liferay.arkadiko.test.util.FrameworkUtil" factory-method="getFramework" />
-		</property>
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+	<bean id="framework" class="com.liferay.arkadiko.test.util.FrameworkUtil" factory-method="init">
+		<constructor-arg>
+			<map>
+				<entry key="org.osgi.framework.bundle.parent" value="app" />
+				<entry key="org.osgi.framework.startlevel.beginning" value="5" />
+				<entry key="org.osgi.framework.storage">
+					<value>${project.dir}/data</value>
+				</entry>
+				<entry key="org.osgi.framework.system.packages.extra">
+					<value>com.liferay.arkadiko.test.interfaces</value>
+				</entry>
+				<entry key="bundle.dir">
+					<value>${bundle.dir}</value>
+				</entry>
+				<entry key="install.bundles">
+					<value>${install.bundles}</value>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="com.liferay.arkadiko.AKBeanPostProcessor" class="com.liferay.arkadiko.AKBeanPostProcessor">
+		<property name="framework" ref="framework" />
 	</bean>
 </beans>

@@ -18,7 +18,6 @@ import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
 import com.liferay.arkadiko.test.impl.InterfaceOneImpl;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
-import com.liferay.arkadiko.test.util.FrameworkUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,7 +40,7 @@ public class TestTwo extends BaseTest {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 			"META-INF/test-two.xml");
 
-		assertEquals(2, context.getBeanDefinitionCount());
+		assertEquals(5, context.getBeanDefinitionCount());
 
 		HasDependencyOnInterfaceOne bean =
 			(HasDependencyOnInterfaceOne)context.getBean(
@@ -54,14 +53,12 @@ public class TestTwo extends BaseTest {
 			interfaceOne.toString(), interfaceOne.methodOne(),
 			InterfaceOneImpl.class.getName());
 
-		Framework framework = FrameworkUtil.getFramework();
+		Framework framework = (Framework)context.getBean("framework");
 
 		BundleContext bundleContext = framework.getBundleContext();
 
-		String bundlePath = System.getProperty("project.dir");
-
 		File bundleOne = new File(
-			bundlePath + "/bundles/bundle-one/bundle-one.jar");
+			getProjectDir() + "/bundles/bundle-one/bundle-one.jar");
 
 		Bundle installedBundle = bundleContext.installBundle(
 			bundleOne.getAbsolutePath(), new FileInputStream(bundleOne));
