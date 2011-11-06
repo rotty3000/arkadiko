@@ -6,10 +6,10 @@
 	<import file="build-common.xml" />
 
 	<target name="clean">
-		<delete dir="classes" />
-		<delete dir="test-classes" />
-		<delete dir="data" />
-		<delete dir="dist" />
+		<delete dir="${project.dir}/classes" />
+		<delete dir="${project.dir}/test-classes" />
+		<delete dir="${project.dir}/data" />
+		<delete dir="${project.dir}/dist" />
 	</target>
 
 	<target name="compile">

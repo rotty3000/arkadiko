@@ -14,7 +14,6 @@
 
 package com.liferay.arkadiko.test.util;
 
-
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -45,14 +44,11 @@ public class FrameworkUtil {
 
 		FrameworkFactory frameworkFactory = frameworkFactories.get(0);
 
-		_framework = frameworkFactory.newFramework(properties);
+		Framework framework = frameworkFactory.newFramework(properties);
 
-		System.out.println(
-			"Framework impl: " + _framework.getClass().getName());
+		framework.init();
 
-		_framework.init();
-
-		BundleContext bundleContext = _framework.getBundleContext();
+		BundleContext bundleContext = framework.getBundleContext();
 
 		String bundlePath = properties.get("bundle.dir");
 		String installBundles = properties.get("install.bundles");
@@ -66,7 +62,7 @@ public class FrameworkUtil {
 				bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
 		}
 
-		_framework.start();
+		framework.start();
 
 		for (Bundle curBundle : bundleContext.getBundles()) {
 			try {
@@ -77,13 +73,7 @@ public class FrameworkUtil {
 			}
 		}
 
-		return _framework;
+		return framework;
 	}
-
-	public static void destroy() throws Exception {
-		_framework.stop();
-	}
-
-	private static Framework _framework;
 
 }

@@ -14,11 +14,12 @@
 
 package com.liferay.arkadiko.test;
 
+import com.liferay.arkadiko.AKBeanPostProcessor;
 import com.liferay.arkadiko.test.util.BaseTest;
 
 import org.osgi.framework.launch.Framework;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -28,15 +29,40 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class TestOne extends BaseTest {
 
-	public void test() {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-			"META-INF/test-one.xml");
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
 
-		assertEquals(3, context.getBeanDefinitionCount());
+		_context = new ClassPathXmlApplicationContext("META-INF/test-one.xml");
 
-		Framework framework = (Framework)context.getBean("framework");
+		_context.registerShutdownHook();
+	}
+
+	public void testBeanCount() {
+		assertEquals(3, _context.getBeanDefinitionCount());
+	}
+
+	public void testAKBeanPostProcessorNotNull() {
+		AKBeanPostProcessor akBeanPostProcessor =
+			(AKBeanPostProcessor)_context.getBean(
+				AKBeanPostProcessor.class.getName());
+
+		assertNotNull(akBeanPostProcessor);
+	}
+
+	public void testFrameworkNotNull() {
+		Framework framework = (Framework)_context.getBean("framework");
 
 		assertNotNull(framework);
 	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		_context.close();
+
+		super.tearDown();
+	}
+
+	private AbstractApplicationContext _context;
 
 }

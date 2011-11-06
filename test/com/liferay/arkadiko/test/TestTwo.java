@@ -26,7 +26,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.launch.Framework;
 
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
@@ -36,14 +36,22 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class TestTwo extends BaseTest {
 
-	public void test() throws Exception {
-		ApplicationContext context = new ClassPathXmlApplicationContext(
-			"META-INF/test-two.xml");
+	@Override
+	protected void setUp() throws Exception {
+		super.setUp();
 
-		assertEquals(5, context.getBeanDefinitionCount());
+		_context = new ClassPathXmlApplicationContext("META-INF/test-two.xml");
 
+		_context.registerShutdownHook();
+	}
+
+	public void testBeanCount() {
+		assertEquals(5, _context.getBeanDefinitionCount());
+	}
+
+	public void testDefaultImplementationExists() {
 		HasDependencyOnInterfaceOne bean =
-			(HasDependencyOnInterfaceOne)context.getBean(
+			(HasDependencyOnInterfaceOne)_context.getBean(
 				HasDependencyOnInterfaceOne.class.getName());
 
 		InterfaceOne interfaceOne = bean.getInterfaceOne();
@@ -52,8 +60,10 @@ public class TestTwo extends BaseTest {
 		assertEquals(
 			interfaceOne.toString(), interfaceOne.methodOne(),
 			InterfaceOneImpl.class.getName());
+	}
 
-		Framework framework = (Framework)context.getBean("framework");
+	public void testDeployBundleWithImplementation() throws Exception {
+		Framework framework = (Framework)_context.getBean("framework");
 
 		BundleContext bundleContext = framework.getBundleContext();
 
@@ -65,6 +75,12 @@ public class TestTwo extends BaseTest {
 
 		installedBundle.start();
 
+		HasDependencyOnInterfaceOne bean =
+			(HasDependencyOnInterfaceOne)_context.getBean(
+				HasDependencyOnInterfaceOne.class.getName());
+
+		InterfaceOne interfaceOne = bean.getInterfaceOne();
+
 		assertFalse(
 			interfaceOne.toString(),
 			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
@@ -75,5 +91,14 @@ public class TestTwo extends BaseTest {
 			interfaceOne.toString(), interfaceOne.methodOne(),
 			InterfaceOneImpl.class.getName());
 	}
+
+	@Override
+	protected void tearDown() throws Exception {
+		_context.close();
+
+		super.tearDown();
+	}
+
+	private AbstractApplicationContext _context;
 
 }
