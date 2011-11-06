@@ -115,17 +115,17 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	 * Post process after initialisation.
 	 *
 	 * @param bean the bean
-	 * @param beanName the bean name
+	 * @param beanId the bean id
 	 * @return the object
 	 * @throws BeansException the beans exception
 	 */
-	public Object postProcessAfterInitialization(Object bean, String beanName)
+	public Object postProcessAfterInitialization(Object bean, String beanId)
 		throws BeansException {
 
 		List<Class<?>> interfaces = AKIntrospector.getInterfacesAsList(
 			bean);
 
-		if (ignoreBean(bean, beanName, interfaces)) {
+		if (ignoreBean(bean, beanId, interfaces)) {
 			return bean;
 		}
 
@@ -133,20 +133,20 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 
 		BundleContext bundleContext = framework.getBundleContext();
 
-		registerService(bundleContext, bean, beanName, interfaces);
+		registerService(bundleContext, bean, beanId, interfaces);
 
-		return createProxy(bundleContext, bean, beanName, interfaces);
+		return createProxy(bundleContext, bean, beanId, interfaces);
 	}
 
 	/**
 	 * Post process before initialisation.
 	 *
 	 * @param bean the bean
-	 * @param beanName the bean name
+	 * @param beanId the bean id
 	 * @return the object
 	 * @throws BeansException the beans exception
 	 */
-	public Object postProcessBeforeInitialization(Object bean, String beanName)
+	public Object postProcessBeforeInitialization(Object bean, String beanId)
 		throws BeansException {
 
 		return bean;
@@ -240,7 +240,7 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	}
 
 	protected Filter createFilter(
-			BundleContext bundleContext, String beanName,
+			BundleContext bundleContext, String beanId,
 			List<Class<?>> interfaces)
 		throws AKBeansException {
 
@@ -265,9 +265,9 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		}
 
 		sb.append('(');
-		sb.append(AKConstants.BEAN_NAME);
+		sb.append(AKConstants.BEAN_ID);
 		sb.append('=');
-		sb.append(beanName);
+		sb.append(beanId);
 		sb.append(")(!(");
 		sb.append(AKConstants.ORIGINAL_BEAN);
 		sb.append("=*)))");
@@ -281,10 +281,10 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	}
 
 	protected Object createProxy(
-		BundleContext bundleContext, Object bean, String beanName,
+		BundleContext bundleContext, Object bean, String beanId,
 		List<Class<?>> interfaces) throws BeansException {
 
-		Filter filter = createFilter(bundleContext, beanName, interfaces);
+		Filter filter = createFilter(bundleContext, beanId, interfaces);
 
 		AKServiceTrackerInvocationHandler serviceTrackerInvocationHandler =
 			new AKServiceTrackerInvocationHandler(
@@ -304,10 +304,10 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	}
 
 	protected boolean ignoreBean(
-		Object bean, String beanName, List<Class<?>> interfaces) {
+		Object bean, String beanId, List<Class<?>> interfaces) {
 
 		if (interfaces.isEmpty() ||
-			ignoreBeanByBeanName(beanName) ||
+			ignoreBeanByBeanName(beanId) ||
 			ignoreBeanByClassName(bean.getClass().getName())) {
 
 			return true;
@@ -316,24 +316,24 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		return false;
 	}
 
-	protected boolean ignoreBeanByBeanName(String beanName) {
+	protected boolean ignoreBeanByBeanName(String beanId) {
 		if (_ignoredBeanNames == null) {
 			return false;
 		}
 
-		for (String ignoredBeanName : _ignoredBeanNames) {
-			if (beanName.equals(ignoredBeanName)) {
+		for (String ignoredBeanId : _ignoredBeanNames) {
+			if (beanId.equals(ignoredBeanId)) {
 				return true;
 			}
-			else if (ignoredBeanName.startsWith(AKConstants.STAR) &&
-					 beanName.endsWith(ignoredBeanName.substring(1))) {
+			else if (ignoredBeanId.startsWith(AKConstants.STAR) &&
+					 beanId.endsWith(ignoredBeanId.substring(1))) {
 
 				return true;
 			}
-			else if (ignoredBeanName.endsWith(AKConstants.STAR) &&
-					 beanName.startsWith(
-						 ignoredBeanName.substring(
-							 0, ignoredBeanName.length() - 1))) {
+			else if (ignoredBeanId.endsWith(AKConstants.STAR) &&
+					 beanId.startsWith(
+						 ignoredBeanId.substring(
+							 0, ignoredBeanId.length() - 1))) {
 
 				return true;
 			}
@@ -369,7 +369,7 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	}
 
 	protected void registerService(
-		BundleContext bundleContext, Object bean, String beanName,
+		BundleContext bundleContext, Object bean, String beanId,
 		List<Class<?>> interfaces) {
 
 		List<String> names = new ArrayList<String>();
@@ -380,7 +380,7 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 
 		Hashtable<String,Object> properties = new Hashtable<String, Object>();
 
-		properties.put(AKConstants.BEAN_NAME, beanName);
+		properties.put(AKConstants.BEAN_ID, beanId);
 		properties.put(AKConstants.ORIGINAL_BEAN, Boolean.TRUE);
 
 		addExtraBeanProperties(properties);

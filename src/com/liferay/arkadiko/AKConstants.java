@@ -19,7 +19,7 @@ package com.liferay.arkadiko;
  */
 public class AKConstants {
 
-	public static final String BEAN_NAME = "bean.name";
+	public static final String BEAN_ID = "bean.id";
 
 	public static final String ORIGINAL_BEAN = "original.bean";
 
