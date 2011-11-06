@@ -58,6 +58,13 @@ public class FrameworkUtil {
 		for (String bundleName : bundleNames) {
 			File bundleFile = new File(bundlePath + "/" + bundleName);
 
+			Bundle bundle = bundleContext.getBundle(
+				bundleFile.getAbsolutePath());
+
+			if (bundle != null) {
+				continue;
+			}
+
 			bundleContext.installBundle(
 				bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
 		}
