@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.launch.Framework;
@@ -37,6 +38,9 @@ import org.springframework.core.Ordered;
  */
 public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 
+	/**
+	 * After properties set.
+	 */
 	public void afterPropertiesSet() {
 		if (_classLoader == null) {
 			_classLoader = Thread.currentThread().getContextClassLoader();
@@ -62,22 +66,59 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		}
 	}
 
+	/**
+	 * Gets the class loader.
+	 *
+	 * @return the class loader
+	 */
 	public ClassLoader getClassLoader() {
 		return _classLoader;
 	}
 
+	/**
+	 * Gets the extra bean properties.
+	 *
+	 * @return the extra bean properties
+	 */
 	public Map<String, Object> getExtraBeanProperties() {
 		return _extraBeanProperties;
 	}
 
+	/**
+	 * Gets the framework.
+	 *
+	 * @return the framework
+	 */
 	public Framework getFramework() {
 		return _framework;
 	}
 
+	/**
+	 * Gets the order.
+	 *
+	 * @return the order
+	 */
 	public int getOrder() {
 		return _order;
 	}
 
+	/**
+	 * Checks if is strict matching.
+	 *
+	 * @return true, if is strict matching
+	 */
+	public boolean isStrictMatching() {
+		return _strictMatching;
+	}
+
+	/**
+	 * Post process after initialisation.
+	 *
+	 * @param bean the bean
+	 * @param beanName the bean name
+	 * @return the object
+	 * @throws BeansException the beans exception
+	 */
 	public Object postProcessAfterInitialization(Object bean, String beanName)
 		throws BeansException {
 
@@ -97,40 +138,93 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		return createProxy(bundleContext, bean, beanName, interfaces);
 	}
 
+	/**
+	 * Post process before initialisation.
+	 *
+	 * @param bean the bean
+	 * @param beanName the bean name
+	 * @return the object
+	 * @throws BeansException the beans exception
+	 */
 	public Object postProcessBeforeInitialization(Object bean, String beanName)
 		throws BeansException {
 
 		return bean;
 	}
 
+	/**
+	 * Sets the class loader.
+	 *
+	 * @param classLoader the new class loader
+	 */
 	public void setClassLoader(ClassLoader classLoader) {
 		_classLoader = classLoader;
 	}
 
+	/**
+	 * Sets the extra bean properties.
+	 *
+	 * @param extraBeanProperties the extra bean properties
+	 */
 	public void setExtraBeanProperties(
 		Map<String, Object> extraBeanProperties) {
 
 		_extraBeanProperties = extraBeanProperties;
 	}
 
+	/**
+	 * Sets the framework.
+	 *
+	 * @param framework the new framework
+	 */
 	public void setFramework(Framework framework) {
 		_framework = framework;
 	}
 
+	/**
+	 * Sets the ignored bean names.
+	 *
+	 * @param ignoredBeanNames the new ignored bean names
+	 */
 	public void setIgnoredBeanNames(List<String> ignoredBeanNames) {
 		_ignoredBeanNames = ignoredBeanNames;
 	}
 
+	/**
+	 * Sets the ignored class names.
+	 *
+	 * @param ignoredClassNames the new ignored class names
+	 */
 	public void setIgnoredClassNames(List<String> ignoredClassNames) {
 		_ignoredClassNames = ignoredClassNames;
 	}
 
+	/**
+	 * Sets the order.
+	 *
+	 * @param order the new order
+	 */
 	public void setOrder(int order) {
 		_order = order;
 	}
 
+	/**
+	 * A class for generating proxies that must implement the newProxyInstance
+	 * as found in {@link java.lang.reflect.Proxy}.
+	 *
+	 * @param proxyFactory the proxy factory class
+	 */
 	public void setProxyFactory(Class<?> proxyFactory) {
 		_proxyFactory = proxyFactory;
+	}
+
+	/**
+	 * Whether services must matched on the full list of bean interfaces.
+	 *
+	 * @param strictMatching
+	 */
+	public void setStrictMatching(boolean strictMatching) {
+		_strictMatching = strictMatching;
 	}
 
 	protected void addExtraBeanProperties(Hashtable<String,Object> properties) {
@@ -146,19 +240,34 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	}
 
 	protected Filter createFilter(
-			BundleContext bundleContext, List<Class<?>> interfaces)
+			BundleContext bundleContext, String beanName,
+			List<Class<?>> interfaces)
 		throws AKBeansException {
 
-		StringBuffer sb = new StringBuffer(interfaces.size() * 3 + 4);
+		StringBuffer sb = new StringBuffer(interfaces.size() * 5 + 10);
 
-		sb.append("(&(|");
+		sb.append("(&");
 
-		for (Class<?> class1 : interfaces) {
-			sb.append("(objectClass=");
-			sb.append(class1.getName());
-			sb.append(")");
+		if (!isStrictMatching()) {
+			sb.append("(|");
 		}
 
+		for (Class<?> clazz : interfaces) {
+			sb.append('(');
+			sb.append(Constants.OBJECTCLASS);
+			sb.append('=');
+			sb.append(clazz.getName());
+			sb.append(')');
+		}
+
+		if (!isStrictMatching()) {
+			sb.append(')');
+		}
+
+		sb.append('(');
+		sb.append(AKConstants.BEAN_NAME);
+		sb.append('=');
+		sb.append(beanName);
 		sb.append(")(!(");
 		sb.append(AKConstants.ORIGINAL_BEAN);
 		sb.append("=*)))");
@@ -175,7 +284,7 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		BundleContext bundleContext, Object bean, String beanName,
 		List<Class<?>> interfaces) throws BeansException {
 
-		Filter filter = createFilter(bundleContext, interfaces);
+		Filter filter = createFilter(bundleContext, beanName, interfaces);
 
 		AKServiceTrackerInvocationHandler serviceTrackerInvocationHandler =
 			new AKServiceTrackerInvocationHandler(
@@ -190,7 +299,7 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 				serviceTrackerInvocationHandler);
 		}
 		catch (Exception e) {
-			throw new AKBeansException("", e);
+			throw new AKBeansException(e.getMessage(), e);
 		}
 	}
 
@@ -288,5 +397,6 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	private List<String> _ignoredBeanNames;
 	private List<String> _ignoredClassNames;
 	private int _order = 20;
+	private boolean _strictMatching = false;
 
 }

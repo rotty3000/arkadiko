@@ -23,12 +23,24 @@ import java.util.List;
  */
 public class AKIntrospector {
 
+	/**
+	 * Gets the interfaces.
+	 *
+	 * @param bean the bean
+	 * @return the interfaces
+	 */
 	public static Class<?>[] getInterfaces(Object bean) {
 		List<Class<?>> interfaces = getInterfacesAsList(bean);
 
 		return interfaces.toArray(new Class<?>[interfaces.size()]);
 	}
 
+	/**
+	 * Gets the interfaces as list.
+	 *
+	 * @param bean the bean
+	 * @return the interfaces as list
+	 */
 	public static List<Class<?>> getInterfacesAsList(Object bean) {
 		List<Class<?>> interfaces = new ArrayList<Class<?>>();
 

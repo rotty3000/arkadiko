@@ -29,6 +29,13 @@ import org.osgi.util.tracker.ServiceTracker;
 public class AKServiceTrackerInvocationHandler
 	extends ServiceTracker implements InvocationHandler {
 
+	/**
+	 * Instantiates a new AKServiceTrackerInvocationHandler.
+	 *
+	 * @param context the context
+	 * @param filter the filter
+	 * @param bean the bean
+	 */
 	public AKServiceTrackerInvocationHandler(
 		BundleContext context, Filter filter, Object bean) {
 
@@ -38,6 +45,13 @@ public class AKServiceTrackerInvocationHandler
 		_originalService = bean;
 	}
 
+	/**
+	 * Instantiates a new AKServiceTrackerInvocationHandler.
+	 *
+	 * @param bundleContext the bundle context
+	 * @param serviceReference the service reference
+	 * @param bean the bean
+	 */
 	public AKServiceTrackerInvocationHandler(
 		BundleContext bundleContext, ServiceReference serviceReference,
 		Object bean) {
@@ -48,6 +62,13 @@ public class AKServiceTrackerInvocationHandler
 		_originalService = bean;
 	}
 
+	/**
+	 * Instantiates a new AKServiceTrackerInvocationHandler.
+	 *
+	 * @param context the context
+	 * @param clazz the clazz
+	 * @param bean the bean
+	 */
 	public AKServiceTrackerInvocationHandler(
 		BundleContext context, String clazz, Object bean) {
 
@@ -57,6 +78,12 @@ public class AKServiceTrackerInvocationHandler
 		_originalService = bean;
 	}
 
+	/**
+	 * Adding service.
+	 *
+	 * @param reference the reference
+	 * @return the object
+	 */
 	@Override
 	public Object addingService(ServiceReference reference) {
 		Object service = super.addingService(reference);
@@ -72,6 +99,15 @@ public class AKServiceTrackerInvocationHandler
 		return service;
 	}
 
+	/**
+	 * Invoke.
+	 *
+	 * @param proxy the proxy
+	 * @param method the method
+	 * @param arguments the arguments
+	 * @return the object
+	 * @throws Throwable the throwable
+	 */
 	public Object invoke(Object proxy, Method method, Object[] arguments)
 		throws Throwable {
 
@@ -86,6 +122,12 @@ public class AKServiceTrackerInvocationHandler
 		}
 	}
 
+	/**
+	 * Removed service.
+	 *
+	 * @param reference the reference
+	 * @param service the service
+	 */
 	@Override
 	public void removedService(ServiceReference reference, Object service) {
 		_currentService = _originalService;
