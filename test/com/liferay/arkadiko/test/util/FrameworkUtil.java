@@ -50,13 +50,13 @@ public class FrameworkUtil {
 
 		BundleContext bundleContext = framework.getBundleContext();
 
-		String bundlePath = properties.get("bundle.dir");
-		String installBundles = properties.get("install.bundles");
+		String bundlesPath = properties.get("bundles.dir");
+		String bundlesToInstall = properties.get("bundles.to.install");
 
-		String[] bundleNames = installBundles.split(",");
+		String[] bundleNames = bundlesToInstall.split(",");
 
 		for (String bundleName : bundleNames) {
-			File bundleFile = new File(bundlePath + "/" + bundleName);
+			File bundleFile = new File(bundlesPath + "/" + bundleName);
 
 			Bundle bundle = bundleContext.getBundle(
 				bundleFile.getAbsolutePath());
@@ -71,12 +71,16 @@ public class FrameworkUtil {
 
 		framework.start();
 
-		for (Bundle curBundle : bundleContext.getBundles()) {
-			try {
-				curBundle.start();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
+		String bundlesForceStart = properties.get("bundles.force.start");
+
+		if (Boolean.TRUE.toString().equals(bundlesForceStart)) {
+			for (Bundle curBundle : bundleContext.getBundles()) {
+				try {
+					curBundle.start();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 

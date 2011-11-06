@@ -100,8 +100,9 @@
 		<junit  printsummary="yes" fork="yes">
 			<classpath refid="run-test.classpath" />
 			<sysproperty key="project.dir" value="${project.dir}" />
-			<sysproperty key="bundle.dir" value="${project.dir}/lib/test/equinox" />
-			<sysproperty key="install.bundles" value="org.eclipse.equinox.ds_1.3.0.v20110502.jar,org.eclipse.osgi.services_3.3.0.v20110513.jar,org.eclipse.equinox.util_1.0.300.v20110502.jar" />
+			<sysproperty key="bundles.dir" value="${project.dir}/lib/test/equinox" />
+			<sysproperty key="bundles.force.start" value="true" />
+			<sysproperty key="bundles.to.install" value="org.eclipse.equinox.ds_1.3.0.v20110502.jar,org.eclipse.osgi.services_3.3.0.v20110513.jar,org.eclipse.equinox.util_1.0.300.v20110502.jar" />
 
 			<batchtest fork="yes" todir="reports">
 				<formatter type="plain" extension="-equinox.txt" />
@@ -122,8 +123,9 @@
 		<junit  printsummary="yes" fork="yes">
 			<classpath refid="run-test.classpath" />
 			<sysproperty key="project.dir" value="${project.dir}" />
-			<sysproperty key="bundle.dir" value="${project.dir}/lib/test/felix" />
-			<sysproperty key="install.bundles" value="org.apache.felix.configadmin-1.2.8.jar,org.apache.felix.log-1.0.1.jar,org.apache.felix.scr-1.6.0.jar" />
+			<sysproperty key="bundles.dir" value="${project.dir}/lib/test/felix" />
+			<sysproperty key="bundles.force.start" value="true" />
+			<sysproperty key="bundles.to.install" value="org.apache.felix.configadmin-1.2.8.jar,org.apache.felix.log-1.0.1.jar,org.apache.felix.scr-1.6.0.jar" />
 
 			<batchtest fork="yes" todir="reports">
 				<formatter type="plain" extension="-felix.txt" />

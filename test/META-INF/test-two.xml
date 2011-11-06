@@ -20,11 +20,14 @@
 				<entry key="org.osgi.framework.system.packages.extra">
 					<value>com.liferay.arkadiko.test.interfaces</value>
 				</entry>
-				<entry key="bundle.dir">
-					<value>${bundle.dir}</value>
+				<entry key="bundles.dir">
+					<value>${bundles.dir}</value>
 				</entry>
-				<entry key="install.bundles">
-					<value>${install.bundles}</value>
+				<entry key="bundles.force.start">
+					<value>${bundles.force.start}</value>
+				</entry>
+				<entry key="bundles.to.install">
+					<value>${bundles.to.install}</value>
 				</entry>
 			</map>
 		</constructor-arg>
