@@ -40,7 +40,7 @@ public class BundleOneInterfaceOneImpl implements InterfaceOne {
 
 	@Reference
 	public void setLog(LogService log) {
-		_log=log;
+		_log = log;
 	}
 
 	private LogService _log;

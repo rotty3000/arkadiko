@@ -18,16 +18,16 @@
 					<value>${project.dir}/data</value>
 				</entry>
 				<entry key="org.osgi.framework.system.packages.extra">
-					<value>com.liferay.arkadiko.test.interfaces</value>
-				</entry>
-				<entry key="bundles.dir">
-					<value>${bundles.dir}</value>
+					<value>com.liferay.arkadiko.test.interfaces,org.apache.commons.logging</value>
 				</entry>
 				<entry key="bundles.force.start">
 					<value>${bundles.force.start}</value>
 				</entry>
 				<entry key="bundles.to.install">
 					<value>${bundles.to.install}</value>
+				</entry>
+				<entry key="project.dir">
+					<value>${project.dir}</value>
 				</entry>
 			</map>
 		</constructor-arg>

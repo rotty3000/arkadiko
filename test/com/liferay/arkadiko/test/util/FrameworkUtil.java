@@ -17,8 +17,12 @@ package com.liferay.arkadiko.test.util;
 import java.io.File;
 import java.io.FileInputStream;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -50,13 +54,13 @@ public class FrameworkUtil {
 
 		BundleContext bundleContext = framework.getBundleContext();
 
-		String bundlesPath = properties.get("bundles.dir");
+		String projectDir = properties.get("project.dir");
 		String bundlesToInstall = properties.get("bundles.to.install");
 
-		String[] bundleNames = bundlesToInstall.split(",");
+		String[] bundlePaths = bundlesToInstall.split(",");
 
-		for (String bundleName : bundleNames) {
-			File bundleFile = new File(bundlesPath + "/" + bundleName);
+		for (String bundlePath : bundlePaths) {
+			File bundleFile = new File(projectDir + "/" + bundlePath);
 
 			Bundle bundle = bundleContext.getBundle(
 				bundleFile.getAbsolutePath());
@@ -69,22 +73,29 @@ public class FrameworkUtil {
 				bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
 		}
 
+		bundleContext.registerService(
+			Log.class, _log, new Hashtable<String, Object>());
+
 		framework.start();
 
 		String bundlesForceStart = properties.get("bundles.force.start");
 
 		if (Boolean.TRUE.toString().equals(bundlesForceStart)) {
-			for (Bundle curBundle : bundleContext.getBundles()) {
+			Bundle[] bundles = bundleContext.getBundles();
+
+			for (Bundle curBundle : bundles) {
 				try {
 					curBundle.start();
 				}
 				catch (Exception e) {
-					e.printStackTrace();
+					_log.error(e, e);
 				}
 			}
 		}
 
 		return framework;
 	}
+
+	private static Log _log = LogFactory.getLog("OSGI");
 
 }

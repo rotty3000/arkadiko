@@ -1,0 +1,7 @@
+Bundle-SymbolicName: bundle-log-adapter
+Bundle-Version: 0.0.1
+Import-Package: org.apache.commons.logging,org.osgi.framework,\
+	org.osgi.service.log
+Private-Package: com.liferay.arkadiko.bundle.log.adapter
+Service-Component: com.liferay.arkadiko.bundle.log.adapter.LogListenerImpl;\
+	immediate:=true
