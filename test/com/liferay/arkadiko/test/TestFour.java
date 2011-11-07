@@ -34,13 +34,13 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  * @author Raymond Augé
  */
-public class TestTwo extends BaseTest {
+public class TestFour extends BaseTest {
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		_context = new ClassPathXmlApplicationContext("META-INF/test-two.xml");
+		_context = new ClassPathXmlApplicationContext("META-INF/test-four.xml");
 
 		_context.registerShutdownHook();
 	}
@@ -49,19 +49,7 @@ public class TestTwo extends BaseTest {
 		assertEquals(5, _context.getBeanDefinitionCount());
 	}
 
-	public void testDefaultImplementationExists() {
-		HasDependencyOnInterfaceOne bean =
-			(HasDependencyOnInterfaceOne)_context.getBean(
-				HasDependencyOnInterfaceOne.class.getName());
-
-		InterfaceOne interfaceOne = bean.getInterfaceOne();
-
-		assertNotNull(interfaceOne);
-		assertEquals(
-			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
-	}
-
-	public void testDeployBundleWithImplementation() throws Exception {
+	public void testIgnoreByName() throws Exception {
 		Framework framework = (Framework)_context.getBean("framework");
 
 		BundleContext bundleContext = framework.getBundleContext();
@@ -80,7 +68,7 @@ public class TestTwo extends BaseTest {
 
 		InterfaceOne interfaceOne = bean.getInterfaceOne();
 
-		assertFalse(
+		assertTrue(
 			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
 
 		installedBundle.uninstall();

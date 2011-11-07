@@ -34,31 +34,19 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  * @author Raymond Augé
  */
-public class TestTwo extends BaseTest {
+public class TestThree extends BaseTest {
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
 
-		_context = new ClassPathXmlApplicationContext("META-INF/test-two.xml");
+		_context = new ClassPathXmlApplicationContext("META-INF/test-three.xml");
 
 		_context.registerShutdownHook();
 	}
 
 	public void testBeanCount() {
-		assertEquals(5, _context.getBeanDefinitionCount());
-	}
-
-	public void testDefaultImplementationExists() {
-		HasDependencyOnInterfaceOne bean =
-			(HasDependencyOnInterfaceOne)_context.getBean(
-				HasDependencyOnInterfaceOne.class.getName());
-
-		InterfaceOne interfaceOne = bean.getInterfaceOne();
-
-		assertNotNull(interfaceOne);
-		assertEquals(
-			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
+		assertEquals(7, _context.getBeanDefinitionCount());
 	}
 
 	public void testDeployBundleWithImplementation() throws Exception {
@@ -83,7 +71,37 @@ public class TestTwo extends BaseTest {
 		assertFalse(
 			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
 
+		HasDependencyOnInterfaceOne beanTwo =
+			(HasDependencyOnInterfaceOne)_context.getBean(
+				HasDependencyOnInterfaceOne.class.getName().concat("_TWO"));
+
+		interfaceOne = beanTwo.getInterfaceOne();
+
+		assertFalse(
+			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
+
+		HasDependencyOnInterfaceOne beanThree =
+			(HasDependencyOnInterfaceOne)_context.getBean(
+				HasDependencyOnInterfaceOne.class.getName().concat("_THREE"));
+
+		interfaceOne = beanThree.getInterfaceOne();
+
+		assertTrue(
+			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
+
 		installedBundle.uninstall();
+
+		interfaceOne = bean.getInterfaceOne();
+
+		assertEquals(
+			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
+
+		interfaceOne = beanTwo.getInterfaceOne();
+
+		assertEquals(
+			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
+
+		interfaceOne = beanThree.getInterfaceOne();
 
 		assertEquals(
 			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
