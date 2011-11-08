@@ -37,12 +37,7 @@
 		<property name="framework" ref="framework" />
 	</bean>
 
-	<bean id="com.liferay.arkadiko.test.impl.InterfaceOneImpl" class="com.liferay.arkadiko.bundle.one.BundleOneInterfaceOneImpl">
-		<property name="interfaces">
-			<list>
-				<value>com.liferay.arkadiko.test.interfaces.InterfaceOne</value>
-			</list>
-		</property>
+	<bean id="com.liferay.arkadiko.test.impl.InterfaceOneImpl" class="osgi(com.liferay.arkadiko.test.interfaces.InterfaceOne)">
 		<property name="value" value="Hello World!" />
 	</bean>
 

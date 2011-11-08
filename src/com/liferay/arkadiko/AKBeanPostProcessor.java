@@ -34,16 +34,12 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.launch.Framework;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyValue;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
 import org.springframework.core.Ordered;
@@ -270,63 +266,42 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			ConfigurableListableBeanFactory beanFactory)
 		throws BeansException {
 
-		if (beanFactory instanceof DefaultListableBeanFactory) {
-			DefaultListableBeanFactory dlbf =
-				(DefaultListableBeanFactory)beanFactory;
+		if (!(beanFactory instanceof DefaultListableBeanFactory)) {
+			return;
+		}
 
-			dlbf.setInstantiationStrategy(this);
+		DefaultListableBeanFactory defaultListableBeanFactory =
+			(DefaultListableBeanFactory)beanFactory;
 
-			for (String beanName : dlbf.getBeanDefinitionNames()) {
-				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(
-					beanName);
+		defaultListableBeanFactory.setInstantiationStrategy(this);
 
-				String className = beanDefinition.getBeanClassName();
+		for (String beanName :
+				defaultListableBeanFactory.getBeanDefinitionNames()) {
 
-				if (className.equals(AKBeanPostProcessor.class.getName()) ||
-					className.startsWith("org.springframework.beans")) {
+			BeanDefinition beanDefinition = beanFactory.getBeanDefinition(
+				beanName);
 
-					continue;
-				}
+			String className = beanDefinition.getBeanClassName();
 
-				List<Class<?>> interfaces = new ArrayList<Class<?>>();
+			if ((className == null) ||
+				!(className.startsWith(AKConstants.CLASSNAME_DECORATOR) &&
+				  className.endsWith(AKConstants.CLOSE_PAREN))) {
 
-				MutablePropertyValues propertyValues =
-					beanDefinition.getPropertyValues();
+				continue;
+			}
 
-				PropertyValue propertyValue = propertyValues.getPropertyValue(
-					"interfaces");
+			try {
+				AKBeanDefinition akBeanDefinition = new AKBeanDefinition(
+					this, _constructor.newInstance(beanDefinition),
+					beanName, getFramework().getBundleContext());
 
-				if (propertyValue == null) {
-					continue;
-				}
+				defaultListableBeanFactory.removeBeanDefinition(beanName);
 
-				ManagedList<TypedStringValue> interfaceNames =
-					(ManagedList<TypedStringValue>)propertyValue.getValue();
-
-				for (TypedStringValue interfaceName : interfaceNames) {
-					try {
-						interfaces.add(Class.forName(interfaceName.getValue()));
-					}
-					catch (ClassNotFoundException e) {
-						e.printStackTrace();
-					}
-				}
-
-				propertyValues.removePropertyValue("interfaces");
-
-				try {
-					AKBeanDefinition def = new AKBeanDefinition(
-						this, _constructor.newInstance(beanDefinition),
-						beanName, interfaces,
-						getFramework().getBundleContext());
-
-					dlbf.removeBeanDefinition(beanName);
-
-					dlbf.registerBeanDefinition(beanName, def);
-				}
-				catch (Exception e) {
-					e.printStackTrace();
-				}
+				defaultListableBeanFactory.registerBeanDefinition(
+					beanName, akBeanDefinition);
+			}
+			catch (Exception e) {
+				_log.error(e, e);
 			}
 		}
 	}
@@ -439,31 +414,31 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 
 		StringBuffer sb = new StringBuffer(interfaces.size() * 5 + 10);
 
-		sb.append("(&");
+		sb.append(AKConstants.OPEN_PAREN_AND_AMP);
 
 		if (!isStrictMatching()) {
-			sb.append("(|");
+			sb.append(AKConstants.OPEN_PAREN_AND_PIPE);
 		}
 
 		for (Class<?> clazz : interfaces) {
-			sb.append('(');
+			sb.append(AKConstants.OPEN_PAREN);
 			sb.append(Constants.OBJECTCLASS);
-			sb.append('=');
+			sb.append(AKConstants.EQUAL);
 			sb.append(clazz.getName());
-			sb.append(')');
+			sb.append(AKConstants.CLOSE_PAREN);
 		}
 
 		if (!isStrictMatching()) {
-			sb.append(')');
+			sb.append(AKConstants.CLOSE_PAREN);
 		}
 
-		sb.append('(');
+		sb.append(AKConstants.OPEN_PAREN);
 		sb.append(AKConstants.BEAN_ID);
-		sb.append('=');
+		sb.append(AKConstants.EQUAL);
 		sb.append(beanId);
-		sb.append(")(!(");
+		sb.append(AKConstants.CP_OP_EX_OP);
 		sb.append(AKConstants.ORIGINAL_BEAN);
-		sb.append("=*)))");
+		sb.append(AKConstants.EQ_STAR_CP_CP_CP);
 
 		try {
 			return bundleContext.createFilter(sb.toString());
@@ -569,6 +544,10 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 
 		for (Class<?> interfaceClass : interfaces) {
 			names.add(interfaceClass.getName());
+		}
+
+		if (names.isEmpty()) {
+			return;
 		}
 
 		Hashtable<String,Object> properties = new Hashtable<String, Object>();

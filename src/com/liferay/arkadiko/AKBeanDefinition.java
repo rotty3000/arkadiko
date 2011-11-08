@@ -14,7 +14,13 @@
 
 package com.liferay.arkadiko;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.osgi.framework.BundleContext;
 
@@ -37,14 +43,13 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	public AKBeanDefinition(
 		AKBeanPostProcessor beanPostProcessor,
 		RootBeanDefinition beanDefinition, String beanName,
-		List<Class<?>> interfaces, BundleContext bundleContext) {
+		BundleContext bundleContext) {
 
 		super(beanDefinition);
 
 		_beanPostProcessor = beanPostProcessor;
 		_beanDefinition = beanDefinition;
 		_beanName = beanName;
-		_interfaces = interfaces;
 		_bundleContext = bundleContext;
 	}
 
@@ -57,7 +62,7 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	public AKBeanDefinition cloneBeanDefinition() {
 		return new AKBeanDefinition(
 			_beanPostProcessor, _beanDefinition.cloneBeanDefinition(),
-			_beanName, _interfaces, _bundleContext);
+			_beanName, _bundleContext);
 	}
 
 	/**
@@ -66,6 +71,41 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	 * @return the proxy
 	 */
 	public Object getProxy() {
+		String className = getBeanClassName();
+
+		if ((className == null) ||
+			!(className.startsWith(AKConstants.CLASSNAME_DECORATOR) &&
+			  className.endsWith(AKConstants.CLOSE_PAREN))) {
+
+			return null;
+		}
+
+		if (_proxyMap.get() == null) {
+			_proxyMap.set(new HashMap<String,Object>());
+		}
+
+		if ((_proxy == null) && _proxyMap.get().containsKey(className)) {
+			_proxy = _proxyMap.get().get(className);
+		}
+
+		if (_proxy != null) {
+			return _proxy;
+		}
+
+		try {
+			List<Class<?>> interfaces = getInterfaces(className);
+
+			_proxy = _beanPostProcessor.createProxy(
+				_bundleContext, null, _beanName, interfaces);
+
+			setBeanClass(_proxy.getClass());
+
+			_proxyMap.get().put(className, _proxy);
+		}
+		catch (Exception e) {
+			_log.error(e, e);
+		}
+
 		return _proxy;
 	}
 
@@ -80,45 +120,48 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	public Class resolveBeanClass(ClassLoader classLoader)
 		throws ClassNotFoundException {
 
-		if (_proxy != null) {
-			return _proxy.getClass();
+		Object proxy = getProxy();
+
+		if (proxy == null) {
+			throw new ClassNotFoundException(getBeanClassName());
 		}
 
-		String className = getBeanClassName();
-
-		if (className == null) {
-			return null;
-		}
-
-		ClassNotFoundException cnfe = null;
-
-		try {
-			return _beanDefinition.resolveBeanClass(classLoader);
-		}
-		catch (ClassNotFoundException cnfe1) {
-			cnfe = cnfe1;
-		}
-
-		if (_proxy == null) {
-			try {
-				_proxy = _beanPostProcessor.createProxy(
-					_bundleContext, null, _beanName, _interfaces);
-
-				setBeanClass(_proxy.getClass());
-			}
-			catch (Exception e) {
-				throw cnfe;
-			}
-		}
-
-		return _proxy.getClass();
+		return proxy.getClass();
 	}
+
+	protected List<Class<?>> getInterfaces(String className)
+		throws ClassNotFoundException {
+
+		className = className.substring(
+			AKConstants.CLASSNAME_DECORATOR.length(), className.length() - 1);
+
+		String[] classNameParts = className.split(AKConstants.COMMA);
+
+		List<Class<?>> interfaces = new ArrayList<Class<?>>();
+
+		for (String interfaceName : classNameParts) {
+			Class<?> interfaceClass = Class.forName(interfaceName);
+
+			if (!interfaceClass.isInterface()) {
+				throw new IllegalArgumentException(
+					interfaceName + " is not an interface");
+			}
+
+			interfaces.add(interfaceClass);
+		}
+
+		return interfaces;
+	}
+
+	private static final Log _log = LogFactory.getLog(AKBeanDefinition.class);
 
 	private RootBeanDefinition _beanDefinition;
 	private String _beanName;
 	private AKBeanPostProcessor _beanPostProcessor;
 	private BundleContext _bundleContext;
-	private List<Class<?>> _interfaces;
 	private Object _proxy;
+
+	private static ThreadLocal<Map<String,Object>> _proxyMap =
+		new ThreadLocal<Map<String,Object>>();
 
 }

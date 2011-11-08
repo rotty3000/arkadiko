@@ -21,7 +21,25 @@ public class AKConstants {
 
 	public static final String BEAN_ID = "bean.id";
 
+	public static final String CLASSNAME_DECORATOR = "osgi(";
+
+	public static final String CLOSE_PAREN = ")";
+
+	public static final String COMMA = ",";
+
 	public static final String COMPONENT_NAME = "component.name";
+
+	public static final String CP_OP_EX_OP = ")(!(";
+
+	public static final String EQUAL = "=";
+
+	public static final String EQ_STAR_CP_CP_CP = "=*)))";
+
+	public static final String OPEN_PAREN = "(";
+
+	public static final String OPEN_PAREN_AND_AMP = "(&";
+
+	public static final String OPEN_PAREN_AND_PIPE = "(|";
 
 	public static final String ORIGINAL_BEAN = "original.bean";
 

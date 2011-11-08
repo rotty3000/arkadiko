@@ -90,7 +90,7 @@ public class AKServiceTrackerInvocationHandler
 	public Object addingService(ServiceReference reference) {
 		Object service = super.addingService(reference);
 
-		Object originalBean = reference.getProperty("original.bean");
+		Object originalBean = reference.getProperty(AKConstants.ORIGINAL_BEAN);
 
 		if ((service == _originalService) || (originalBean != null)) {
 			return service;

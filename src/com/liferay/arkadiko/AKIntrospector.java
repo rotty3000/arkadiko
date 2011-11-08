@@ -49,8 +49,6 @@ public class AKIntrospector {
 		interfaces.addAll(Arrays.asList(beanClass.getInterfaces()));
 
 		while((beanClass = beanClass.getSuperclass()) != null) {
-			// Loop to avoid duplicates
-
 			for (Class<?> classInterface : beanClass.getInterfaces()) {
 				if (!interfaces.contains(classInterface)) {
 					interfaces.add(classInterface);
