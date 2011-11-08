@@ -43,6 +43,8 @@ public class AKConstants {
 
 	public static final String ORIGINAL_BEAN = "original.bean";
 
+	public static final String POUND = "#";
+
 	public static final String STAR = "*";
 
 }

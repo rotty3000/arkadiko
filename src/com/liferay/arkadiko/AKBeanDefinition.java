@@ -51,6 +51,7 @@ public class AKBeanDefinition extends RootBeanDefinition {
 		_beanDefinition = beanDefinition;
 		_beanName = beanName;
 		_bundleContext = bundleContext;
+		_originalClassName = beanDefinition.getBeanClassName();
 	}
 
 	/**
@@ -71,7 +72,7 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	 * @return the proxy
 	 */
 	public Object getProxy() {
-		String className = getBeanClassName();
+		String className = _originalClassName;
 
 		if ((className == null) ||
 			!(className.startsWith(AKConstants.CLASSNAME_DECORATOR) &&
@@ -84,11 +85,15 @@ public class AKBeanDefinition extends RootBeanDefinition {
 			_proxyMap.set(new HashMap<String,Object>());
 		}
 
-		if ((_proxy == null) && _proxyMap.get().containsKey(className)) {
-			_proxy = _proxyMap.get().get(className);
+		String mapKey = _beanName.concat(AKConstants.POUND).concat(className);
+
+		if ((_proxy == null) && _proxyMap.get().containsKey(mapKey)) {
+			_proxy = _proxyMap.get().get(mapKey);
 		}
 
 		if (_proxy != null) {
+			setBeanClass(_proxy.getClass());
+
 			return _proxy;
 		}
 
@@ -100,7 +105,7 @@ public class AKBeanDefinition extends RootBeanDefinition {
 
 			setBeanClass(_proxy.getClass());
 
-			_proxyMap.get().put(className, _proxy);
+			_proxyMap.get().put(mapKey, _proxy);
 		}
 		catch (Exception e) {
 			_log.error(e, e);
@@ -159,6 +164,7 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	private String _beanName;
 	private AKBeanPostProcessor _beanPostProcessor;
 	private BundleContext _bundleContext;
+	private String _originalClassName;
 	private Object _proxy;
 
 	private static ThreadLocal<Map<String,Object>> _proxyMap =
