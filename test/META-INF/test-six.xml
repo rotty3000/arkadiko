@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+
+<beans
+	default-destroy-method="destroy"
+	default-init-method="afterPropertiesSet"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+>
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+	<bean id="framework" class="com.liferay.arkadiko.test.util.FrameworkUtil" factory-method="init" destroy-method="stop">
+		<constructor-arg>
+			<map>
+				<entry key="org.osgi.framework.bundle.parent" value="app" />
+				<entry key="org.osgi.framework.startlevel.beginning" value="5" />
+				<entry key="org.osgi.framework.storage">
+					<value>${project.dir}/data</value>
+				</entry>
+				<entry key="org.osgi.framework.system.packages.extra">
+					<value>com.liferay.arkadiko.test.interfaces,org.apache.commons.logging</value>
+				</entry>
+				<entry key="bundles.force.start">
+					<value>${bundles.force.start}</value>
+				</entry>
+				<entry key="bundles.to.install">
+					<value>${bundles.to.install}</value>
+				</entry>
+				<entry key="project.dir">
+					<value>${project.dir}</value>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="com.liferay.arkadiko.AKBeanPostProcessor" class="com.liferay.arkadiko.AKBeanPostProcessor">
+		<property name="framework" ref="framework" />
+	</bean>
+
+	<bean id="com.liferay.arkadiko.test.impl.InterfaceOneImpl" class="com.liferay.arkadiko.bundle.one.BundleOneInterfaceOneImpl">
+		<property name="interfaces">
+			<list>
+				<value>com.liferay.arkadiko.test.interfaces.InterfaceOne</value>
+			</list>
+		</property>
+		<property name="value" value="Hello World!" />
+	</bean>
+
+	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
+		<property name="interfaceOne" ref="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
+	</bean>
+</beans>

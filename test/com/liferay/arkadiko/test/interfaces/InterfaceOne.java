@@ -21,6 +21,10 @@ package com.liferay.arkadiko.test.interfaces;
  */
 public interface InterfaceOne {
 
+	public String getValue();
+
 	public String methodOne ();
+
+	public void setValue(String value);
 
 }

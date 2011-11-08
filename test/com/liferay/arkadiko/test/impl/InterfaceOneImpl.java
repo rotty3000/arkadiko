@@ -23,11 +23,23 @@ import com.liferay.arkadiko.test.interfaces.InterfaceOne;
  */
 public class InterfaceOneImpl implements InterfaceOne {
 
+	public String getValue() {
+		return _value;
+	}
+
 	/* (non-Javadoc)
 	 * @see com.liferay.arkadiko.test.interfaces.InterfaceOne#methodOne()
 	 */
 	public String methodOne() {
 		return getClass().getName();
 	}
+
+	public void setValue(String value) {
+		_value = value;
+
+		System.out.println(methodOne() + " " + value);
+	}
+
+	private String _value;
 
 }

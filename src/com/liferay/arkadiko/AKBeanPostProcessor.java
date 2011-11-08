@@ -14,6 +14,7 @@
 
 package com.liferay.arkadiko;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -23,6 +24,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -30,13 +34,54 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.launch.Framework;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.MutablePropertyValues;
+import org.springframework.beans.PropertyValue;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.TypedStringValue;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.beans.factory.support.ManagedList;
+import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
 import org.springframework.core.Ordered;
 
 /**
  * @author Raymond Augé
  */
-public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
+public class AKBeanPostProcessor extends SimpleInstantiationStrategy
+	implements BeanFactoryPostProcessor, BeanPostProcessor, Ordered {
+
+	private static Constructor<RootBeanDefinition> _constructor = null;
+
+	static {
+		Constructor<RootBeanDefinition> constructor = null;
+
+		try {
+			for (Constructor<?> curConstructor :
+					RootBeanDefinition.class.getDeclaredConstructors()) {
+
+				Class<?>[] parameterTypes = curConstructor.getParameterTypes();
+				if ((parameterTypes.length == 1) &&
+					(parameterTypes[0].equals(BeanDefinition.class))) {
+
+					constructor =
+						(Constructor<RootBeanDefinition>)curConstructor;
+				}
+			}
+
+			if (!constructor.isAccessible()) {
+				constructor.setAccessible(true);
+			}
+
+			_constructor = constructor;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * After properties set.
@@ -103,6 +148,83 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 	}
 
 	/**
+	 * Instantiate.
+	 *
+	 * @param beanDefinition the bean definition
+	 * @param beanName the bean name
+	 * @param owner the owner
+	 * @return the object
+	 */
+	@Override
+	public Object instantiate(
+		RootBeanDefinition beanDefinition, String beanName, BeanFactory owner) {
+
+		if (beanDefinition instanceof AKBeanDefinition) {
+			AKBeanDefinition akBeanDefinition =
+				(AKBeanDefinition)beanDefinition;
+
+			return akBeanDefinition.getProxy();
+		}
+
+		return super.instantiate(beanDefinition, beanName, owner);
+	}
+
+
+	/**
+	 * Instantiate.
+	 *
+	 * @param beanDefinition the bean definition
+	 * @param beanName the bean name
+	 * @param owner the owner
+	 * @param ctor the ctor
+	 * @param args the args
+	 * @return the object
+	 */
+	@Override
+	public Object instantiate(
+		RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+		Constructor<?> ctor, Object[] args) {
+
+		if (beanDefinition instanceof AKBeanDefinition) {
+			AKBeanDefinition akBeanDefinition =
+				(AKBeanDefinition)beanDefinition;
+
+			return akBeanDefinition.getProxy();
+		}
+
+		return super.instantiate(beanDefinition, beanName, owner, ctor, args);
+	}
+
+
+	/**
+	 * Instantiate.
+	 *
+	 * @param beanDefinition the bean definition
+	 * @param beanName the bean name
+	 * @param owner the owner
+	 * @param factoryBean the factory bean
+	 * @param factoryMethod the factory method
+	 * @param args the args
+	 * @return the object
+	 */
+	@Override
+	public Object instantiate(
+		RootBeanDefinition beanDefinition, String beanName, BeanFactory owner,
+		Object factoryBean, Method factoryMethod, Object[] args) {
+
+		if (beanDefinition instanceof AKBeanDefinition) {
+			AKBeanDefinition akBeanDefinition =
+				(AKBeanDefinition)beanDefinition;
+
+			return akBeanDefinition.getProxy();
+		}
+
+		return super.instantiate(beanDefinition, beanName, owner, factoryBean,
+			factoryMethod, args);
+	}
+
+
+	/**
 	 * Checks if is strict matching.
 	 *
 	 * @return true, if is strict matching
@@ -136,6 +258,77 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		registerService(bundleContext, bean, beanId, interfaces);
 
 		return createProxy(bundleContext, bean, beanId, interfaces);
+	}
+
+	/**
+	 * Post process bean factory.
+	 *
+	 * @param beanFactory the bean factory
+	 * @throws BeansException the beans exception
+	 */
+	public void postProcessBeanFactory(
+			ConfigurableListableBeanFactory beanFactory)
+		throws BeansException {
+
+		if (beanFactory instanceof DefaultListableBeanFactory) {
+			DefaultListableBeanFactory dlbf =
+				(DefaultListableBeanFactory)beanFactory;
+
+			dlbf.setInstantiationStrategy(this);
+
+			for (String beanName : dlbf.getBeanDefinitionNames()) {
+				BeanDefinition beanDefinition = beanFactory.getBeanDefinition(
+					beanName);
+
+				String className = beanDefinition.getBeanClassName();
+
+				if (className.equals(AKBeanPostProcessor.class.getName()) ||
+					className.startsWith("org.springframework.beans")) {
+
+					continue;
+				}
+
+				List<Class<?>> interfaces = new ArrayList<Class<?>>();
+
+				MutablePropertyValues propertyValues =
+					beanDefinition.getPropertyValues();
+
+				PropertyValue propertyValue = propertyValues.getPropertyValue(
+					"interfaces");
+
+				if (propertyValue == null) {
+					continue;
+				}
+
+				ManagedList<TypedStringValue> interfaceNames =
+					(ManagedList<TypedStringValue>)propertyValue.getValue();
+
+				for (TypedStringValue interfaceName : interfaceNames) {
+					try {
+						interfaces.add(Class.forName(interfaceName.getValue()));
+					}
+					catch (ClassNotFoundException e) {
+						e.printStackTrace();
+					}
+				}
+
+				propertyValues.removePropertyValue("interfaces");
+
+				try {
+					AKBeanDefinition def = new AKBeanDefinition(
+						this, _constructor.newInstance(beanDefinition),
+						beanName, interfaces,
+						getFramework().getBundleContext());
+
+					dlbf.removeBeanDefinition(beanName);
+
+					dlbf.registerBeanDefinition(beanName, def);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/**
@@ -388,6 +581,9 @@ public class AKBeanPostProcessor implements BeanPostProcessor, Ordered {
 		bundleContext.registerService(
 			names.toArray(new String[names.size()]), bean, properties);
 	}
+
+	private static final Log _log = LogFactory.getLog(
+		AKBeanPostProcessor.class);
 
 	private Class<?> _proxyFactory;
 	private ClassLoader _classLoader;

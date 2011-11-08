@@ -29,13 +29,20 @@ import org.osgi.service.log.LogService;
 @Component
 public class BundleOneInterfaceOneImpl implements InterfaceOne {
 
-	/* (non-Javadoc)
-	 * @see com.liferay.arkadiko.test.interfaces.InterfaceOne#methodOne()
-	 */
+	public String getValue() {
+		return _value;
+	}
+
 	public String methodOne() {
 		_log.log(LogService.LOG_INFO, getClass().getName());
 
 		return getClass().getName();
+	}
+
+	public void setValue(String value) {
+		_value = value;
+
+		_log.log(LogService.LOG_INFO, getClass().getName() + " " + value);
 	}
 
 	@Reference
@@ -44,5 +51,6 @@ public class BundleOneInterfaceOneImpl implements InterfaceOne {
 	}
 
 	private LogService _log;
+	private String _value;
 
 }

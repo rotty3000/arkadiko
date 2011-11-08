@@ -39,15 +39,14 @@ public class LogListenerImpl implements LogListener {
 		int level = entry.getLevel();
 		ServiceReference<?> serviceReference = entry.getServiceReference();
 
-		StringBuilder sb = new StringBuilder(6);
+		StringBuilder sb = new StringBuilder(5);
 
-		sb.append(" [");
+		sb.append("[");
 		sb.append(bundle.getSymbolicName());
 		sb.append("] ");
 		sb.append(entry.getMessage());
 
 		if (serviceReference != null) {
-			sb.append(" ");
 			sb.append(serviceReference.toString());
 		}
 
