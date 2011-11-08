@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.arkadiko.test.util;
+package com.liferay.arkadiko.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -34,12 +35,12 @@ import org.osgi.framework.launch.FrameworkFactory;
  *
  * @author Raymond Augé
  */
-public class FrameworkUtil {
+public class AKFrameworkFactory {
 
 	public static Framework init(Map<String, String> properties)
 		throws Exception {
 
-		List<FrameworkFactory> frameworkFactories = ServiceLoader.load(
+		List<FrameworkFactory> frameworkFactories = AKServiceLoader.load(
 			FrameworkFactory.class);
 
 		if (frameworkFactories.isEmpty()) {
@@ -69,8 +70,14 @@ public class FrameworkUtil {
 				continue;
 			}
 
-			bundleContext.installBundle(
-				bundleFile.getAbsolutePath(), new FileInputStream(bundleFile));
+			try {
+				bundleContext.installBundle(
+					bundleFile.getAbsolutePath(),
+					new FileInputStream(bundleFile));
+			}
+			catch (BundleException be) {
+				_log.error(be, be);
+			}
 		}
 
 		bundleContext.registerService(

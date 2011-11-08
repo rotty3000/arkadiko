@@ -9,7 +9,7 @@
 >
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
-	<bean id="framework" class="com.liferay.arkadiko.test.util.FrameworkUtil" factory-method="init" destroy-method="stop">
+	<bean id="framework" class="com.liferay.arkadiko.util.AKFrameworkFactory" factory-method="init" destroy-method="stop">
 		<constructor-arg>
 			<map>
 				<entry key="org.osgi.framework.bundle.parent" value="app" />

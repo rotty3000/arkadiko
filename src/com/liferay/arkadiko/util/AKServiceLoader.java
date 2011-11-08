@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.arkadiko.test.util;
+package com.liferay.arkadiko.util;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * @author Brian Wing Shun Chan
  */
-public class ServiceLoader {
+public class AKServiceLoader {
 
 	public static <S> List<S> load(Class<S> clazz) throws Exception {
 		Thread currentThread = Thread.currentThread();
