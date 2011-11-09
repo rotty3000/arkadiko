@@ -81,7 +81,8 @@ public class AKFrameworkFactory {
 		}
 
 		bundleContext.registerService(
-			Log.class, _log, new Hashtable<String, Object>());
+			LogFactory.class, LogFactory.getFactory(),
+			new Hashtable<String, Object>());
 
 		framework.start();
 
@@ -107,6 +108,6 @@ public class AKFrameworkFactory {
 		return framework;
 	}
 
-	private static Log _log = LogFactory.getLog("OSGI");
+	private static Log _log = LogFactory.getLog(AKFrameworkFactory.class);
 
 }

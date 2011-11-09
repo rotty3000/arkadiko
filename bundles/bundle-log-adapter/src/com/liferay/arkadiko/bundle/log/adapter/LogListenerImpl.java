@@ -20,6 +20,7 @@ import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -39,28 +40,28 @@ public class LogListenerImpl implements LogListener {
 		int level = entry.getLevel();
 		ServiceReference<?> serviceReference = entry.getServiceReference();
 
-		StringBuilder sb = new StringBuilder(5);
+		Log log = _logFactory.getInstance(bundle.getSymbolicName());
 
-		sb.append("[");
-		sb.append(bundle.getSymbolicName());
-		sb.append("] ");
+		StringBuilder sb = new StringBuilder(3);
+
 		sb.append(entry.getMessage());
 
 		if (serviceReference != null) {
+			sb.append(" ");
 			sb.append(serviceReference.toString());
 		}
 
-		if ((level == LogService.LOG_DEBUG) && _log.isDebugEnabled()) {
-			_log.debug(sb.toString(), entry.getException());
+		if ((level == LogService.LOG_DEBUG) && log.isDebugEnabled()) {
+			log.debug(sb.toString(), entry.getException());
 		}
-		else if ((level == LogService.LOG_ERROR) && _log.isErrorEnabled()) {
-			_log.error(sb.toString(), entry.getException());
+		else if ((level == LogService.LOG_ERROR) && log.isErrorEnabled()) {
+			log.error(sb.toString(), entry.getException());
 		}
-		else if ((level == LogService.LOG_INFO) && _log.isInfoEnabled()) {
-			_log.info(sb.toString(), entry.getException());
+		else if ((level == LogService.LOG_INFO) && log.isInfoEnabled()) {
+			log.info(sb.toString(), entry.getException());
 		}
-		else if ((level == LogService.LOG_WARNING) && _log.isWarnEnabled()) {
-			_log.warn(sb.toString(), entry.getException());
+		else if ((level == LogService.LOG_WARNING) && log.isWarnEnabled()) {
+			log.warn(sb.toString(), entry.getException());
 		}
 	}
 
@@ -75,8 +76,8 @@ public class LogListenerImpl implements LogListener {
 	}
 
 	@Reference
-	public void setLog(Log log) {
-		_log = log;
+	public void setLogFactory(LogFactory logFactory) {
+		_logFactory = logFactory;
 	}
 
 	@Reference
@@ -84,7 +85,7 @@ public class LogListenerImpl implements LogListener {
 		_logReaderService = logReaderService;
 	}
 
-	private Log _log;
+	private LogFactory _logFactory;
 	private LogReaderService _logReaderService;
 
 }
