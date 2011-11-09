@@ -61,7 +61,7 @@ public class AKFrameworkFactory {
 		String[] bundlePaths = bundlesToInstall.split(",");
 
 		for (String bundlePath : bundlePaths) {
-			File bundleFile = new File(projectDir + "/" + bundlePath);
+			File bundleFile = new File(projectDir + "/" + bundlePath.trim());
 
 			Bundle bundle = bundleContext.getBundle(
 				bundleFile.getAbsolutePath());
