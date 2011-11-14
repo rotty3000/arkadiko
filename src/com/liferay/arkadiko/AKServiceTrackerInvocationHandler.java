@@ -48,39 +48,6 @@ public class AKServiceTrackerInvocationHandler
 	}
 
 	/**
-	 * Instantiates a new AKServiceTrackerInvocationHandler.
-	 *
-	 * @param bundleContext the bundle context
-	 * @param serviceReference the service reference
-	 * @param bean the bean
-	 */
-	public AKServiceTrackerInvocationHandler(
-		BundleContext bundleContext, ServiceReference serviceReference,
-		Object bean) {
-
-		super(bundleContext, serviceReference, null);
-
-		_currentService = bean;
-		_originalService = bean;
-	}
-
-	/**
-	 * Instantiates a new AKServiceTrackerInvocationHandler.
-	 *
-	 * @param context the context
-	 * @param clazz the clazz
-	 * @param bean the bean
-	 */
-	public AKServiceTrackerInvocationHandler(
-		BundleContext context, String clazz, Object bean) {
-
-		super(context, clazz, null);
-
-		_currentService = bean;
-		_originalService = bean;
-	}
-
-	/**
 	 * Adding service.
 	 *
 	 * @param reference the reference
@@ -90,9 +57,7 @@ public class AKServiceTrackerInvocationHandler
 	public Object addingService(ServiceReference reference) {
 		Object service = super.addingService(reference);
 
-		Object originalBean = reference.getProperty(AKConstants.ORIGINAL_BEAN);
-
-		if ((service == _originalService) || (originalBean != null)) {
+		if (service == _originalService) {
 			return service;
 		}
 
@@ -135,9 +100,8 @@ public class AKServiceTrackerInvocationHandler
 
 				return null;
 			}
-			else {
-				throw new IllegalStateException("called too early!");
-			}
+
+			throw new IllegalStateException("called too early!");
 		}
 
 		try {
