@@ -474,7 +474,8 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	protected boolean ignoreBean(
 		Object bean, String beanId, List<Class<?>> interfaces) {
 
-		if (interfaces.isEmpty() ||
+		if ((beanId.indexOf(AKConstants.POUND) != -1) ||
+			interfaces.isEmpty() ||
 			ignoreBeanByBeanName(beanId) ||
 			ignoreBeanByClassName(bean.getClass().getName())) {
 
