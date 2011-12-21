@@ -14,10 +14,9 @@
 
 package com.liferay.arkadiko.util;
 
-import aQute.libg.header.OSGiHeader;
-
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -57,6 +56,23 @@ public class AKFrameworkFactory {
 
 		BundleContext bundleContext = framework.getBundleContext();
 
+		bundleContext.registerService(
+			LogFactory.class, LogFactory.getFactory(),
+			new Hashtable<String, Object>());
+
+		installBundles(bundleContext, properties);
+
+		framework.start();
+
+		startBundles(bundleContext, properties);
+
+		return framework;
+	}
+
+	protected static void installBundles(
+			BundleContext bundleContext, Map<String, String> properties)
+		throws BundleException, IOException {
+
 		String projectDir = properties.get("project.dir");
 		String bundlesToInstall = properties.get("bundles.to.install");
 
@@ -81,12 +97,10 @@ public class AKFrameworkFactory {
 				_log.error(be, be);
 			}
 		}
+	}
 
-		bundleContext.registerService(
-			LogFactory.class, LogFactory.getFactory(),
-			new Hashtable<String, Object>());
-
-		framework.start();
+	protected static void startBundles(
+		BundleContext bundleContext, Map<String, String> properties) {
 
 		String bundlesForceStart = properties.get("bundles.force.start");
 
@@ -106,8 +120,6 @@ public class AKFrameworkFactory {
 				}
 			}
 		}
-
-		return framework;
 	}
 
 	private static Log _log = LogFactory.getLog(AKFrameworkFactory.class);
