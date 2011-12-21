@@ -416,7 +416,7 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 
 		sb.append(AKConstants.OPEN_PAREN_AND_AMP);
 
-		if (!isStrictMatching()) {
+		if (!isStrictMatching() && (interfaces.size() > 1)) {
 			sb.append(AKConstants.OPEN_PAREN_AND_PIPE);
 		}
 
@@ -428,7 +428,7 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			sb.append(AKConstants.CLOSE_PAREN);
 		}
 
-		if (!isStrictMatching()) {
+		if (!isStrictMatching() && (interfaces.size() > 1)) {
 			sb.append(AKConstants.CLOSE_PAREN);
 		}
 
