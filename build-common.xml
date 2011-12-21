@@ -19,7 +19,7 @@
 	</path>
 
 	<path id="test.classpath">
-		<fileset dir="${project.dir}/lib" includes="commons-logging.jar,log4j.jar,org.springframework.*.jar" />
+		<fileset dir="${project.dir}/lib" includes="biz.aQute.bnd.jar,commons-logging.jar,log4j.jar,org.springframework.*.jar" />
 		<fileset dir="${project.dir}/lib/test" includes="ant-junit.jar,junit.jar" />
 		<path path="${project.dir}/classes" />
 	</path>

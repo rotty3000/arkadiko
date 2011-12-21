@@ -14,6 +14,8 @@
 
 package com.liferay.arkadiko.util;
 
+import aQute.libg.header.OSGiHeader;
+
 import java.io.File;
 import java.io.FileInputStream;
 
