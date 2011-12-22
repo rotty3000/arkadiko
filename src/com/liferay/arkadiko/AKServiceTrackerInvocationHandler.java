@@ -55,7 +55,7 @@ public class AKServiceTrackerInvocationHandler
 	 */
 	@Override
 	public Object addingService(ServiceReference reference) {
-		Object service = super.addingService(reference);
+		Object service = context.getService(reference);
 
 		if (service == _originalService) {
 			return service;
@@ -115,6 +115,17 @@ public class AKServiceTrackerInvocationHandler
 		}
 	}
 
+	@Override
+	public void modifiedService(ServiceReference reference, Object oldService) {
+		Object newService = context.getService(reference);
+
+		if (newService == _originalService) {
+			return;
+		}
+
+		_currentService = newService;
+	}
+
 	/**
 	 * Removed service.
 	 *
@@ -125,7 +136,7 @@ public class AKServiceTrackerInvocationHandler
 	public void removedService(ServiceReference reference, Object service) {
 		_currentService = _originalService;
 
-		super.removedService(reference, service);
+		context.ungetService(reference);
 	}
 
 	private Object _currentService;
