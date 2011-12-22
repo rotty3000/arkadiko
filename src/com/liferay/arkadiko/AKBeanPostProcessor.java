@@ -458,7 +458,7 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			new AKServiceTrackerInvocationHandler(
 				bundleContext, filter, bean);
 
-		serviceTrackerInvocationHandler.open();
+		serviceTrackerInvocationHandler.open(true);
 
 		try {
 			return _proxyFactoryMethod.invoke(
