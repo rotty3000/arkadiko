@@ -90,11 +90,7 @@ such a time as they evolve their own OSGi solutions.
 
 Licensed under the LGPL 2.1 or later (see LICENSE).
 
-Arkadiko is very small and very simple! It only comprises 5 classes in total
-(one is an exception, one is constants, one is a util class, the real work is
-done by two classes).
+Arkadiko is very small and very simple! It only comprises a few classes.
 
 Adding Arkadiko to your existing spring configurations is as simple as adding a
-single bean.
-
-See the fully documented example at examples/arkadiko-spring.xml.
+single bean. See the fully documented example at examples/arkadiko-spring.xml.
