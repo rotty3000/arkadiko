@@ -88,13 +88,13 @@
 		<property name="framework" ref="framework" />
 
 		<!--
-		 * ignoredBeanNames (Optional):
+		 * excludeBeanNames (Optional):
 		 *
-		 * Provide a list of bean names that should be ignored. Names may be
+		 * Provide a list of bean names that should be excluded. Names may be
 		 * prefixed or suffixed with a * for simple matching.
 		-->
 		<!--
-		<property name="ignoredBeanNames">
+		<property name="excludeBeanNames">
 			<list>
 				<value>com.liferay.portal.kernel.util.PortalClassLoaderUtil*</value>
 				<value>*Advice</value>
@@ -103,13 +103,13 @@
 		-->
 
 		<!--
-		 * ignoredClassNames (Optional):
+		 * excludeClassNames (Optional):
 		 *
-		 * Provide a list of class names that should be ignored. Names may be
+		 * Provide a list of class names that should be excluded. Names may be
 		 * prefixed or suffixed with a * for simple matching.
 		-->
 		<!--
-		<property name="ignoredClassNames">
+		<property name="excludeClassNames">
 			<list>
 				<value>com.liferay.portal.cluster.*</value>
 				<value>com.liferay.portal.dao.jdbc.*</value>
@@ -172,6 +172,36 @@
 					/>
 				</entry>
 			</util:map>
+		</property>
+		-->
+
+		<!--
+		 * includeBeanNames (Optional):
+		 *
+		 * Provide a list of bean names that should be included. Names may be
+		 * prefixed or suffixed with a * for simple matching. The default
+		 * behavior, if no list is provided, is to include all beans.
+		-->
+		<!--
+		<property name="includeBeanNames">
+			<list>
+				<value>com.liferay.*</value>
+			</list>
+		</property>
+		-->
+
+		<!--
+		 * includeClassNames (Optional):
+		 *
+		 * Provide a list of class names that should be included. Names may be
+		 * prefixed or suffixed with a * for simple matching. The default
+		 * behavior, if no list is provided, is to include all beans.
+		-->
+		<!--
+		<property name="includeClassNames">
+			<list>
+				<value>com.liferay.*</value>
+			</list>
 		</property>
 		-->
 

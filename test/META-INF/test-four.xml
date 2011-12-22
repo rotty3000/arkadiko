@@ -35,7 +35,7 @@
 
 	<bean id="com.liferay.arkadiko.AKBeanPostProcessor" class="com.liferay.arkadiko.AKBeanPostProcessor">
 		<property name="framework" ref="framework" />
-		<property name="ignoredBeanNames">
+		<property name="excludeBeanNames">
 			<list>
 				<value>com.liferay.arkadiko.test.impl.InterfaceOneImpl</value>
 			</list>

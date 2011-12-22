@@ -165,7 +165,6 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		return super.instantiate(beanDefinition, beanName, owner);
 	}
 
-
 	/**
 	 * Instantiate.
 	 *
@@ -190,7 +189,6 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 
 		return super.instantiate(beanDefinition, beanName, owner, ctor, args);
 	}
-
 
 	/**
 	 * Instantiate.
@@ -218,7 +216,6 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		return super.instantiate(beanDefinition, beanName, owner, factoryBean,
 			factoryMethod, args);
 	}
-
 
 	/**
 	 * Checks if is strict matching.
@@ -330,6 +327,24 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
+	 * Sets the excluded bean names.
+	 *
+	 * @param excludeBeanNames the new ignored bean names
+	 */
+	public void setExcludeBeanNames(List<String> excludeBeanNames) {
+		_excludeBeanNames = excludeBeanNames;
+	}
+
+	/**
+	 * Sets the excluded class names.
+	 *
+	 * @param excludeClassNames the new ignored class names
+	 */
+	public void setExcludeClassNames(List<String> excludeClassNames) {
+		_excludeClassNames = excludeClassNames;
+	}
+
+	/**
 	 * Sets the extra bean properties.
 	 *
 	 * @param extraBeanProperties the extra bean properties
@@ -350,22 +365,23 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the ignored bean names.
+	 * Sets the include bean names.
 	 *
-	 * @param ignoredBeanNames the new ignored bean names
+	 * @param includeBeanNames the new include bean names
 	 */
-	public void setIgnoredBeanNames(List<String> ignoredBeanNames) {
-		_ignoredBeanNames = ignoredBeanNames;
+	public void setIncludeBeanNames(List<String> includeBeanNames) {
+		_includeBeanNames = includeBeanNames;
 	}
 
 	/**
-	 * Sets the ignored class names.
+	 * Sets the include class names.
 	 *
-	 * @param ignoredClassNames the new ignored class names
+	 * @param includeClassNames the new include class names
 	 */
-	public void setIgnoredClassNames(List<String> ignoredClassNames) {
-		_ignoredClassNames = ignoredClassNames;
+	public void setIncludeClassNames(List<String> includeClassNames) {
+		_includeClassNames = includeClassNames;
 	}
+
 
 	/**
 	 * Sets the order.
@@ -389,12 +405,17 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	/**
 	 * Whether services must matched on the full list of bean interfaces.
 	 *
-	 * @param strictMatching
+	 * @param strictMatching the new strict matching
 	 */
 	public void setStrictMatching(boolean strictMatching) {
 		_strictMatching = strictMatching;
 	}
 
+	/**
+	 * Adds the extra bean properties.
+	 *
+	 * @param properties the properties
+	 */
 	protected void addExtraBeanProperties(Hashtable<String,Object> properties) {
 		if ((_extraBeanProperties == null) || _extraBeanProperties.isEmpty()) {
 			return;
@@ -407,6 +428,15 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		}
 	}
 
+	/**
+	 * Creates the filter.
+	 *
+	 * @param bundleContext the bundle context
+	 * @param beanId the bean id
+	 * @param interfaces the interfaces
+	 * @return the filter
+	 * @throws AKBeansException the aK beans exception
+	 */
 	protected Filter createFilter(
 			BundleContext bundleContext, String beanId,
 			List<Class<?>> interfaces)
@@ -448,6 +478,16 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		}
 	}
 
+	/**
+	 * Creates the proxy.
+	 *
+	 * @param bundleContext the bundle context
+	 * @param bean the bean
+	 * @param beanId the bean id
+	 * @param interfaces the interfaces
+	 * @return the object
+	 * @throws BeansException the beans exception
+	 */
 	protected Object createProxy(
 		BundleContext bundleContext, Object bean, String beanId,
 		List<Class<?>> interfaces) throws BeansException {
@@ -471,13 +511,167 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		}
 	}
 
+	/**
+	 * Exclude bean by bean name.
+	 *
+	 * @param beanId the bean id
+	 * @return true, if successful
+	 */
+	protected boolean excludeBeanByBeanName(String beanId) {
+		if (_excludeBeanNames == null) {
+			return false;
+		}
+
+		for (String excludedBeanId : _excludeBeanNames) {
+			if (beanId.equals(excludedBeanId)) {
+				return true;
+			}
+			else if (excludedBeanId.startsWith(AKConstants.STAR) &&
+					 beanId.endsWith(excludedBeanId.substring(1))) {
+
+				return true;
+			}
+			else if (excludedBeanId.endsWith(AKConstants.STAR) &&
+					 beanId.startsWith(
+						 excludedBeanId.substring(
+							 0, excludedBeanId.length() - 1))) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Exclude bean by class name.
+	 *
+	 * @param className the class name
+	 * @return true, if successful
+	 */
+	protected boolean excludeBeanByClassName(String className) {
+		if (_excludeClassNames == null) {
+			return false;
+		}
+
+		for (String excludedClassName : _excludeClassNames) {
+			if (className.equals(excludedClassName)) {
+				return true;
+			}
+			else if (excludedClassName.startsWith(AKConstants.STAR) &&
+					 className.endsWith(excludedClassName.substring(1))) {
+
+				return true;
+			}
+			else if (excludedClassName.endsWith(AKConstants.STAR) &&
+					 className.startsWith(
+						 excludedClassName.substring(
+							 0, excludedClassName.length() - 1))) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Include bean by bean name.
+	 *
+	 * @param beanId the bean id
+	 * @return true, if successful
+	 */
+	protected boolean includeBeanByBeanName(String beanId) {
+		if (_includeBeanNames == null) {
+			return true;
+		}
+
+		for (String includedBeanName : _includeBeanNames) {
+			if (beanId.equals(includedBeanName)) {
+				return true;
+			}
+			else if (includedBeanName.startsWith(AKConstants.STAR) &&
+					 beanId.endsWith(includedBeanName.substring(1))) {
+
+				return true;
+			}
+			else if (includedBeanName.endsWith(AKConstants.STAR) &&
+					 beanId.startsWith(
+						 includedBeanName.substring(
+							 0, includedBeanName.length() - 1))) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Include bean by class name.
+	 *
+	 * @param className the class name
+	 * @return true, if successful
+	 */
+	protected boolean includeBeanByClassName(String className) {
+		if (_includeClassNames == null) {
+			return true;
+		}
+
+		for (String includedClassName : _includeClassNames) {
+			if (className.equals(includedClassName)) {
+				return true;
+			}
+			else if (includedClassName.startsWith(AKConstants.STAR) &&
+					 className.endsWith(includedClassName.substring(1))) {
+
+				return true;
+			}
+			else if (includedClassName.endsWith(AKConstants.STAR) &&
+					 className.startsWith(
+						 includedClassName.substring(
+							 0, includedClassName.length() - 1))) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Ignore bean.
+	 *
+	 * @param bean the bean
+	 * @param beanId the bean id
+	 * @param interfaces the interfaces
+	 * @return true, if successful
+	 */
 	protected boolean ignoreBean(
 		Object bean, String beanId, List<Class<?>> interfaces) {
 
+		// Automatically exclude anonymous beans or beans that don't implement
+		// any interfaces
+
 		if ((beanId.indexOf(AKConstants.POUND) != -1) ||
-			interfaces.isEmpty() ||
-			ignoreBeanByBeanName(beanId) ||
-			ignoreBeanByClassName(bean.getClass().getName())) {
+			interfaces.isEmpty()) {
+
+			return true;
+		}
+
+		// If there are inclusion lists, and the bean is not in the lists,
+		// ignore it
+
+		if (!includeBeanByBeanName(beanId) &&
+			!includeBeanByClassName(beanId)) {
+
+			return true;
+		}
+
+		// If the bean is specifically excluded by name of class, ignore it
+
+		if (excludeBeanByBeanName(beanId) ||
+			excludeBeanByClassName(bean.getClass().getName())) {
 
 			return true;
 		}
@@ -485,58 +679,14 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		return false;
 	}
 
-	protected boolean ignoreBeanByBeanName(String beanId) {
-		if (_ignoredBeanNames == null) {
-			return false;
-		}
-
-		for (String ignoredBeanId : _ignoredBeanNames) {
-			if (beanId.equals(ignoredBeanId)) {
-				return true;
-			}
-			else if (ignoredBeanId.startsWith(AKConstants.STAR) &&
-					 beanId.endsWith(ignoredBeanId.substring(1))) {
-
-				return true;
-			}
-			else if (ignoredBeanId.endsWith(AKConstants.STAR) &&
-					 beanId.startsWith(
-						 ignoredBeanId.substring(
-							 0, ignoredBeanId.length() - 1))) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	protected boolean ignoreBeanByClassName(String className) {
-		if (_ignoredClassNames == null) {
-			return false;
-		}
-
-		for (String ignoredClassName : _ignoredClassNames) {
-			if (className.equals(ignoredClassName)) {
-				return true;
-			}
-			else if (ignoredClassName.startsWith(AKConstants.STAR) &&
-					 className.endsWith(ignoredClassName.substring(1))) {
-
-				return true;
-			}
-			else if (ignoredClassName.endsWith(AKConstants.STAR) &&
-					 className.startsWith(
-						 ignoredClassName.substring(
-							 0, ignoredClassName.length() - 1))) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
+	/**
+	 * Register service.
+	 *
+	 * @param bundleContext the bundle context
+	 * @param bean the bean
+	 * @param beanId the bean id
+	 * @param interfaces the interfaces
+	 */
 	protected void registerService(
 		BundleContext bundleContext, Object bean, String beanId,
 		List<Class<?>> interfaces) {
@@ -565,14 +715,16 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	private static final Log _log = LogFactory.getLog(
 		AKBeanPostProcessor.class);
 
-	private Class<?> _proxyFactory;
 	private ClassLoader _classLoader;
+	private List<String> _excludeBeanNames;
+	private List<String> _excludeClassNames;
 	private Map<String, Object> _extraBeanProperties;
-	private Method _proxyFactoryMethod;
 	private Framework _framework;
-	private List<String> _ignoredBeanNames;
-	private List<String> _ignoredClassNames;
+	private List<String> _includeBeanNames;
+	private List<String> _includeClassNames;
 	private int _order = 20;
+	private Class<?> _proxyFactory;
+	private Method _proxyFactoryMethod;
 	private boolean _strictMatching = false;
 
 }
