@@ -84,13 +84,13 @@
 	</target>
 
 	<target name="test" depends="compile,compile-test,build-bundles">
-		<mkdir dir="${project.dir}/reports" />
-
 		<antcall target="test-equinox" />
 		<antcall target="test-felix" />
 	</target>
 
 	<target name="test-equinox">
+		<mkdir dir="${project.dir}/reports/equinox" />
+
 		<path id="run-test.classpath">
 			<path refid="test.classpath" />
 			<path path="${project.dir}/test-classes"/>
@@ -103,7 +103,7 @@
 			<sysproperty key="bundles.force.start" value="true" />
 			<sysproperty key="bundles.to.install" value="lib/test/equinox/org.eclipse.equinox.ds_1.3.0.v20110502.jar,lib/test/equinox/org.eclipse.osgi.services_3.3.0.v20110513.jar,lib/test/equinox/org.eclipse.equinox.util_1.0.300.v20110502.jar,bundles/bundle-log-adapter/bundle-log-adapter.jar" />
 
-			<batchtest fork="yes" todir="reports">
+			<batchtest fork="yes" todir="${project.dir}/reports/equinox">
 				<formatter type="plain" extension="-equinox.txt" />
 				<fileset dir="test">
 					<include name="**/test/*Test*.java"/>
@@ -113,6 +113,8 @@
 	</target>
 
 	<target name="test-felix">
+		<mkdir dir="${project.dir}/reports/felix" />
+
 		<path id="run-test.classpath">
 			<path refid="test.classpath" />
 			<path path="${project.dir}/test-classes"/>
@@ -125,7 +127,7 @@
 			<sysproperty key="bundles.force.start" value="true" />
 			<sysproperty key="bundles.to.install" value="lib/test/felix/org.apache.felix.configadmin-1.2.8.jar,lib/test/felix/org.apache.felix.log-1.0.1.jar,lib/test/felix/org.apache.felix.scr-1.6.0.jar,bundles/bundle-log-adapter/bundle-log-adapter.jar" />
 
-			<batchtest fork="yes" todir="reports">
+			<batchtest fork="yes" todir="${project.dir}/reports/felix">
 				<formatter type="plain" extension="-felix.txt" />
 				<fileset dir="test">
 					<include name="**/test/*Test*.java"/>

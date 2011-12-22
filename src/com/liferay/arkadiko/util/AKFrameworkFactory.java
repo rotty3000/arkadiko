@@ -14,12 +14,21 @@
 
 package com.liferay.arkadiko.util;
 
+import aQute.libg.header.OSGiHeader;
+import aQute.libg.version.Version;
+
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
@@ -55,6 +65,57 @@ public class AKFrameworkFactory {
 
 		BundleContext bundleContext = framework.getBundleContext();
 
+		bundleContext.registerService(
+			LogFactory.class, LogFactory.getFactory(),
+			new Hashtable<String, Object>());
+
+		installBundles(bundleContext, properties);
+
+		framework.start();
+
+		startBundles(bundleContext, properties);
+
+		return framework;
+	}
+
+	protected static Bundle getBundle(
+		BundleContext bundleContext, Manifest manifest) {
+
+		Attributes attributes = manifest.getMainAttributes();
+
+		String bundleSymbolicNameAttribute = attributes.getValue(
+			Constants.BUNDLE_SYMBOLICNAME);
+
+		Map<String, Map<String, String>> bundleSymbolicNamesMap =
+			OSGiHeader.parseHeader(bundleSymbolicNameAttribute);
+
+		Set<String> bundleSymbolicNamesSet = bundleSymbolicNamesMap.keySet();
+
+		Iterator<String> bundleSymbolicNamesIterator =
+			bundleSymbolicNamesSet.iterator();
+
+		String bundleSymbolicName = bundleSymbolicNamesIterator.next();
+
+		String bundleVersionAttribute = attributes.getValue(
+			Constants.BUNDLE_VERSION);
+
+		Version bundleVersion = Version.parseVersion(bundleVersionAttribute);
+
+		for (Bundle bundle : bundleContext.getBundles()) {
+			if (bundleSymbolicName.equals(bundle.getSymbolicName()) &&
+				bundleVersion.equals(bundle.getVersion())) {
+
+				return bundle;
+			}
+		}
+
+		return null;
+	}
+
+	protected static void installBundles(
+			BundleContext bundleContext, Map<String, String> properties)
+		throws BundleException, IOException {
+
 		String projectDir = properties.get("project.dir");
 		String bundlesToInstall = properties.get("bundles.to.install");
 
@@ -63,28 +124,33 @@ public class AKFrameworkFactory {
 		for (String bundlePath : bundlePaths) {
 			File bundleFile = new File(projectDir + "/" + bundlePath.trim());
 
-			Bundle bundle = bundleContext.getBundle(
-				bundleFile.getAbsolutePath());
+			JarFile jarFile = new JarFile(bundleFile);
+
+			Bundle bundle = getBundle(bundleContext, jarFile.getManifest());
+
+			jarFile.close();
 
 			if (bundle != null) {
 				continue;
 			}
 
+			FileInputStream fileInputStream = new FileInputStream(bundleFile);
+
 			try {
 				bundleContext.installBundle(
-					bundleFile.getAbsolutePath(),
-					new FileInputStream(bundleFile));
+					bundleFile.getAbsolutePath(), fileInputStream);
 			}
 			catch (BundleException be) {
 				_log.error(be, be);
 			}
+			finally {
+				fileInputStream.close();
+			}
 		}
+	}
 
-		bundleContext.registerService(
-			LogFactory.class, LogFactory.getFactory(),
-			new Hashtable<String, Object>());
-
-		framework.start();
+	protected static void startBundles(
+		BundleContext bundleContext, Map<String, String> properties) {
 
 		String bundlesForceStart = properties.get("bundles.force.start");
 
@@ -104,8 +170,6 @@ public class AKFrameworkFactory {
 				}
 			}
 		}
-
-		return framework;
 	}
 
 	private static Log _log = LogFactory.getLog(AKFrameworkFactory.class);

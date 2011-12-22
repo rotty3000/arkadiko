@@ -7,31 +7,92 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
 >
-	<bean class="com.liferay.arkadiko.BridgeBeanPostProcessor">
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+	<!--
+	 * com.liferay.arkadiko.util.AKFrameworkFactory:
+	 *
+	 * This is a simple implementation of a Framework factory class which will
+	 * attempt to locate and initialize a Framework instance from the
+	 * classpath.
+	 *
+	 * The single parameter of the factory method is a
+	 * java.util.Map<String, String> object which can contain any of the
+	 * standard OSGi defined Framework properties. In addition it can contain
+	 * a few custom properties as defined below.
+	-->
+	<bean
+		id="framework"
+		class="com.liferay.arkadiko.util.AKFrameworkFactory"
+		factory-method="init"
+		destroy-method="stop"
+	>
+		<constructor-arg>
+			<map>
+				<entry key="org.osgi.framework.bundle.parent" value="app" />
+				<entry key="org.osgi.framework.startlevel.beginning" value="5" />
+				<entry key="org.osgi.framework.storage">
+					<value>${project.dir}/data</value>
+				</entry>
+				<entry key="org.osgi.framework.system.packages.extra">
+					<value>com.liferay.arkadiko.test.interfaces,org.apache.commons.logging</value>
+				</entry>
+
+				<!--
+				 * Set to true if you want to forcefully attempt to start all
+				 * the installed bundles.
+				-->
+				<entry key="bundles.force.start">
+					<value>${bundles.force.start}</value>
+				</entry>
+				<entry key="bundles.to.install">
+					<value>${bundles.to.install}</value>
+				</entry>
+				<entry key="project.dir">
+					<value>${project.dir}</value>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean
+		id="com.liferay.arkadiko.AKBeanPostProcessor"
+		class="com.liferay.arkadiko.AKBeanPostProcessor"
+	>
+
 		<!--
-		  -- classLoader (Optional): Will use
-		  --     Thread.currentThread().getContextClassLoader();
-		  -- if none is provided.
-		  --
-		  -->
+		 * classLoader (Optional):
+		 *
+		 * The ClassLoader which will be used to create proxies around beans
+		 * in order to implement ServiceListener support. If no ClassLoader is
+		 * provided Thread.currentThread().getContextClassLoader() will be used.
+		-->
 		<!--
 		<property name="classLoader">
-			<bean class="com.liferay.portal.kernel.util.PortalClassLoaderUtil" factory-method="getClassLoader" />
+			<bean
+				class="com.liferay.portal.kernel.util.PortalClassLoaderUtil"
+				factory-method="getClassLoader"
+			/>
 		</property>
 		-->
 
 		<!--
-		  -- framework (Required): Provide the Framework to be bridged.
-		  -->
-		<property name="framework">
-			<bean class="com.liferay.portal.osgi.service.OSGiServiceUtil" factory-method="getFramework" />
-		</property>
+		 * framework (Required):
+		 *
+		 * Provide an instance of org.osgi.framework.launch.Framework into which
+		 * the spring beans, matching the rules below, will be published. In
+		 * turn, from the framework it will be possible to provide services that
+		 * implement or override beans that are needed or used in this spring
+		 * context.
+		-->
+		<property name="framework" ref="framework" />
 
 		<!--
-		  -- ignoredBeanNames (Optional): Provide a list of bean names that
-		  -- should be ignored. Names may be prefixed or suffixed with a * for
-		  -- simple matching.
-		  -->
+		 * ignoredBeanNames (Optional):
+		 *
+		 * Provide a list of bean names that should be ignored. Names may be
+		 * prefixed or suffixed with a * for simple matching.
+		-->
 		<!--
 		<property name="ignoredBeanNames">
 			<list>
@@ -42,10 +103,11 @@
 		-->
 
 		<!--
-		  -- ignoredClassNames (Optional): Provide a list of class names that
-		  -- should be ignored. Names may be prefixed or suffixed with a * for
-		  -- simple matching.
-		  -->
+		 * ignoredClassNames (Optional):
+		 *
+		 * Provide a list of class names that should be ignored. Names may be
+		 * prefixed or suffixed with a * for simple matching.
+		-->
 		<!--
 		<property name="ignoredClassNames">
 			<list>
@@ -65,14 +127,79 @@
 		-->
 
 		<!--
-		  -- proxyFactory (Optional): Provide the class name of a proxy factory
-		  -- class with a static method matching the signature of
-		  -- "newProxyInstance" method of java.lang.reflect.Proxy. If none is
-		  -- provided java.lang.reflect.Proxy is used.
-		  -->
+		 * extraBeanProperties (Optional):
+		 *
+		 * Provide a Map (<util:map/>) which specifies key=value pairs for
+		 * properties you want to add to each bean published to the framework.
+		-->
+		<!--
+		<property name="extraBeanProperties">
+			<util:map>
+				<entry key="service.vendor">
+					<bean
+						class="com.liferay.portal.kernel.util.ReleaseInfo"
+						factory-method="getVendor"
+					/>
+				</entry>
+				<entry key="service.vendor.buildDate">
+					<bean
+						class="com.liferay.portal.kernel.util.ReleaseInfo"
+						factory-method="getBuildDate"
+					/>
+				</entry>
+				<entry key="service.vendor.buildNumber">
+					<bean
+						class="com.liferay.portal.kernel.util.ReleaseInfo"
+						factory-method="getBuildNumber"
+					/>
+				</entry>
+				<entry key="service.vendor.codeName">
+					<bean
+						class="com.liferay.portal.kernel.util.ReleaseInfo"
+						factory-method="getCodeName"
+					/>
+				</entry>
+				<entry key="service.vendor.serverInfo">
+					<bean
+						class="com.liferay.portal.kernel.util.ReleaseInfo"
+						factory-method="getServerInfo"
+					/>
+				</entry>
+				<entry key="service.vendor.version">
+					<bean
+						class="com.liferay.portal.kernel.util.ReleaseInfo"
+						factory-method="getVersion"
+					/>
+				</entry>
+			</util:map>
+		</property>
+		-->
+
+		<!--
+		 * proxyFactory (Optional):
+		 *
+		 * Provide the class name of a proxy factory class with a static method
+		 * matching the signature of "newProxyInstance" method of
+		 * java.lang.reflect.Proxy. If none is provided java.lang.reflect.Proxy
+		 * is used.
+		-->
 		<!--
 		<property name="proxyFactory">
 			<value type="java.lang.Class">com.liferay.portal.kernel.util.ProxyUtil</value>
+		</property>
+		-->
+
+		<!--
+		 * strictMatching (Optional): If set to true, strict matching should
+		 * occur when new services are published into the framework. Strict
+		 * matches involve matching all interfaces as well as the bean.id
+		 * property. Otherwise, only a single interface (typically the primary
+		 * interface under which the service is published) and the bean.id
+		 * property must match.
+		-->
+		<!--
+		<property name="strictMatching">
+			<value>false</value>
 		</property>
 		-->
 	</bean>
