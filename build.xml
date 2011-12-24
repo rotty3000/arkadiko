@@ -10,6 +10,7 @@
 		<delete dir="${project.dir}/test-classes" />
 		<delete dir="${project.dir}/data" />
 		<delete dir="${project.dir}/dist" />
+		<delete dir="${project.dir}/bundles" includes="**/*.jar" />
 	</target>
 
 	<target name="compile">
