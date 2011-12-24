@@ -80,6 +80,14 @@ public class AKServiceTrackerInvocationHandler
 		return service;
 	}
 
+	public Object getCurrentService() {
+		return _currentService;
+	}
+
+	public Object getOriginalService() {
+		return _originalService;
+	}
+
 	/**
 	 * Invoke.
 	 *

@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +48,49 @@ import org.osgi.framework.launch.FrameworkFactory;
  * @author Raymond Augé
  */
 public class AKFrameworkFactory {
+
+	public static Bundle getBundle(
+		BundleContext bundleContext, File bundleFile) throws IOException {
+
+		JarFile jarFile = new JarFile(bundleFile);
+
+		Manifest manifest = jarFile.getManifest();
+
+		jarFile.close();
+
+		Attributes attributes = manifest.getMainAttributes();
+
+		String bundleSymbolicNameAttribute = attributes.getValue(
+			Constants.BUNDLE_SYMBOLICNAME);
+
+		Map<String, Map<String, String>> bundleSymbolicNamesMap =
+			OSGiHeader.parseHeader(bundleSymbolicNameAttribute);
+
+		Set<String> bundleSymbolicNamesSet = bundleSymbolicNamesMap.keySet();
+
+		Iterator<String> bundleSymbolicNamesIterator =
+			bundleSymbolicNamesSet.iterator();
+
+		String bundleSymbolicName = bundleSymbolicNamesIterator.next();
+
+		String bundleVersionAttribute = attributes.getValue(
+			Constants.BUNDLE_VERSION);
+
+		Version bundleVersion = Version.parseVersion(bundleVersionAttribute);
+
+		for (Bundle bundle : bundleContext.getBundles()) {
+			Version curBundleVersion = Version.parseVersion(
+				bundle.getVersion().toString());
+
+			if (bundleSymbolicName.equals(bundle.getSymbolicName()) &&
+				bundleVersion.equals(curBundleVersion)) {
+
+				return bundle;
+			}
+		}
+
+		return null;
+	}
 
 	public static Framework init(Map<String, String> properties)
 		throws Exception {
@@ -78,38 +123,18 @@ public class AKFrameworkFactory {
 		return framework;
 	}
 
-	protected static Bundle getBundle(
-		BundleContext bundleContext, Manifest manifest) {
+	public static boolean isFragment(Bundle bundle) {
+		Dictionary<String,String> headers = bundle.getHeaders();
 
-		Attributes attributes = manifest.getMainAttributes();
+		Enumeration<String> keys = headers.keys();
 
-		String bundleSymbolicNameAttribute = attributes.getValue(
-			Constants.BUNDLE_SYMBOLICNAME);
-
-		Map<String, Map<String, String>> bundleSymbolicNamesMap =
-			OSGiHeader.parseHeader(bundleSymbolicNameAttribute);
-
-		Set<String> bundleSymbolicNamesSet = bundleSymbolicNamesMap.keySet();
-
-		Iterator<String> bundleSymbolicNamesIterator =
-			bundleSymbolicNamesSet.iterator();
-
-		String bundleSymbolicName = bundleSymbolicNamesIterator.next();
-
-		String bundleVersionAttribute = attributes.getValue(
-			Constants.BUNDLE_VERSION);
-
-		Version bundleVersion = Version.parseVersion(bundleVersionAttribute);
-
-		for (Bundle bundle : bundleContext.getBundles()) {
-			if (bundleSymbolicName.equals(bundle.getSymbolicName()) &&
-				bundleVersion.equals(bundle.getVersion())) {
-
-				return bundle;
+		while (keys.hasMoreElements()) {
+			if (keys.nextElement().equals(Constants.FRAGMENT_HOST)) {
+				return true;
 			}
 		}
 
-		return null;
+		return false;
 	}
 
 	protected static void installBundles(
@@ -124,11 +149,7 @@ public class AKFrameworkFactory {
 		for (String bundlePath : bundlePaths) {
 			File bundleFile = new File(projectDir + "/" + bundlePath.trim());
 
-			JarFile jarFile = new JarFile(bundleFile);
-
-			Bundle bundle = getBundle(bundleContext, jarFile.getManifest());
-
-			jarFile.close();
+			Bundle bundle = getBundle(bundleContext, bundleFile);
 
 			if (bundle != null) {
 				continue;
@@ -158,7 +179,9 @@ public class AKFrameworkFactory {
 			Bundle[] bundles = bundleContext.getBundles();
 
 			for (Bundle curBundle : bundles) {
-				if (curBundle.getState() == Bundle.ACTIVE) {
+				if ((curBundle.getState() == Bundle.ACTIVE) ||
+					isFragment(curBundle)) {
+
 					continue;
 				}
 
