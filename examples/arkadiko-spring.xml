@@ -29,6 +29,11 @@
 	>
 		<constructor-arg>
 			<map>
+				<!--
+				 * See the documentation for
+				 * org.osgi.framework.launch.Framework to find which properties
+				 * are available.
+				-->
 				<entry key="org.osgi.framework.bundle.parent" value="app" />
 				<entry key="org.osgi.framework.startlevel.beginning" value="5" />
 				<entry key="org.osgi.framework.storage">
@@ -45,9 +50,19 @@
 				<entry key="bundles.force.start">
 					<value>${bundles.force.start}</value>
 				</entry>
+
+				<!--
+				 * Provide a comma delimited list of bundles to install. These
+				 * may include path relative to "project.dir" property.
+				-->
 				<entry key="bundles.to.install">
 					<value>${bundles.to.install}</value>
 				</entry>
+
+				<!--
+				 * Set the path to the project dir, for location of resources,
+				 * including the list of bundles to install.
+				-->
 				<entry key="project.dir">
 					<value>${project.dir}</value>
 				</entry>
@@ -77,17 +92,6 @@
 		-->
 
 		<!--
-		 * framework (Required):
-		 *
-		 * Provide an instance of org.osgi.framework.launch.Framework into which
-		 * the spring beans, matching the rules below, will be published. In
-		 * turn, from the framework it will be possible to provide services that
-		 * implement or override beans that are needed or used in this spring
-		 * context.
-		-->
-		<property name="framework" ref="framework" />
-
-		<!--
 		 * excludeBeanNames (Optional):
 		 *
 		 * Provide a list of bean names that should be excluded. Names may be
@@ -96,7 +100,6 @@
 		<!--
 		<property name="excludeBeanNames">
 			<list>
-				<value>com.liferay.portal.kernel.util.PortalClassLoaderUtil*</value>
 				<value>*Advice</value>
 			</list>
 		</property>
@@ -111,17 +114,8 @@
 		<!--
 		<property name="excludeClassNames">
 			<list>
-				<value>com.liferay.portal.cluster.*</value>
-				<value>com.liferay.portal.dao.jdbc.*</value>
-				<value>com.liferay.portal.dao.orm.*</value>
-				<value>com.liferay.portal.kernel.cluster.*</value>
-				<value>com.liferay.portal.kernel.util.PortalClassLoaderUtil</value>
-				<value>com.liferay.portal.search.lucene.PerFieldAnalyzerWrapper</value>
-				<value>com.liferay.portal.util.HttpImpl</value>
 				<value>java.lang.*</value>
 				<value>java.util.*</value>
-				<value>org.apache.lucene.*</value>
-				<value>org.springframework.*</value>
 			</list>
 		</property>
 		-->
@@ -147,24 +141,6 @@
 						factory-method="getBuildDate"
 					/>
 				</entry>
-				<entry key="service.vendor.buildNumber">
-					<bean
-						class="com.liferay.portal.kernel.util.ReleaseInfo"
-						factory-method="getBuildNumber"
-					/>
-				</entry>
-				<entry key="service.vendor.codeName">
-					<bean
-						class="com.liferay.portal.kernel.util.ReleaseInfo"
-						factory-method="getCodeName"
-					/>
-				</entry>
-				<entry key="service.vendor.serverInfo">
-					<bean
-						class="com.liferay.portal.kernel.util.ReleaseInfo"
-						factory-method="getServerInfo"
-					/>
-				</entry>
 				<entry key="service.vendor.version">
 					<bean
 						class="com.liferay.portal.kernel.util.ReleaseInfo"
@@ -174,6 +150,17 @@
 			</util:map>
 		</property>
 		-->
+
+		<!--
+		 * framework (Required):
+		 *
+		 * Provide an instance of org.osgi.framework.launch.Framework into which
+		 * the spring beans, matching the rules below, will be published. In
+		 * turn, from the framework it will be possible to provide services that
+		 * implement or override beans that are needed or used in this spring
+		 * context.
+		-->
+		<property name="framework" ref="framework" />
 
 		<!--
 		 * includeBeanNames (Optional):
@@ -206,6 +193,24 @@
 		-->
 
 		<!--
+		 * order (Optional):
+		 *
+		 * As a BeanPostProcessor, we may have to play nicely with other
+		 * BeanPostProcessors also included in the spring context. Use the
+		 * order property to adjust the order in which BeanPostProcessors are
+		 * invoked by spring. When BeanPostProcessors don't set an order, the
+		 * ordering of invocation is indeterminate which may lead to unexpected
+		 * behavior and possibly errors. Therefore setting the specific order is
+		 * recommended. The most common case for Arkadiko is to be invoked last.
+		 * The default value is 20.
+		-->
+		<!--
+		<property name="order">
+			<value type="java.lang.Integer">20</value>
+		</property>
+		-->
+
+		<!--
 		 * proxyFactory (Optional):
 		 *
 		 * Provide the class name of a proxy factory class with a static method
@@ -220,16 +225,18 @@
 		-->
 
 		<!--
-		 * strictMatching (Optional): If set to true, strict matching should
+		 * strictMatching (Optional):
+		 *
+		 * If set to true, strict matching should
 		 * occur when new services are published into the framework. Strict
 		 * matches involve matching all interfaces as well as the bean.id
 		 * property. Otherwise, only a single interface (typically the primary
 		 * interface under which the service is published) and the bean.id
-		 * property must match.
+		 * property must match. Default is false.
 		-->
 		<!--
 		<property name="strictMatching">
-			<value>false</value>
+			<value>true</value>
 		</property>
 		-->
 	</bean>
