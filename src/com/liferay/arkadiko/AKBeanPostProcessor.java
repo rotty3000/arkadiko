@@ -318,7 +318,11 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the class loader.
+	 * classLoader (Optional):
+	 *
+	 * The ClassLoader which will be used to create proxies around beans
+	 * in order to implement ServiceListener support. If no ClassLoader is
+	 * provided Thread.currentThread().getContextClassLoader() will be used.
 	 *
 	 * @param classLoader the new class loader
 	 */
@@ -327,7 +331,10 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the excluded bean names.
+	 * excludeBeanNames (Optional):
+	 *
+	 * Provide a list of bean names that should be excluded. Names may be
+	 * prefixed or suffixed with a * for simple matching.
 	 *
 	 * @param excludeBeanNames the new ignored bean names
 	 */
@@ -336,7 +343,10 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the excluded class names.
+	 * excludeClassNames (Optional):
+	 *
+	 * Provide a list of class names that should be excluded. Names may be
+	 * prefixed or suffixed with a * for simple matching.
 	 *
 	 * @param excludeClassNames the new ignored class names
 	 */
@@ -345,7 +355,10 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the extra bean properties.
+	 * extraBeanProperties (Optional):
+	 *
+	 * Provide a Map (<util:map/>) which specifies key=value pairs for
+	 * properties you want to add to each bean published to the framework.
 	 *
 	 * @param extraBeanProperties the extra bean properties
 	 */
@@ -356,7 +369,13 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the framework.
+	 * framework (Required):
+	 *
+	 * Provide an instance of org.osgi.framework.launch.Framework into which
+	 * the spring beans, matching the rules below, will be published. In
+	 * turn, from the framework it will be possible to provide services that
+	 * implement or override beans that are needed or used in this spring
+	 * context.
 	 *
 	 * @param framework the new framework
 	 */
@@ -365,7 +384,11 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the include bean names.
+	 * includeBeanNames (Optional):
+	 *
+	 * Provide a list of bean names that should be included. Names may be
+	 * prefixed or suffixed with a * for simple matching. The default
+	 * behavior, if no list is provided, is to include all beans.
 	 *
 	 * @param includeBeanNames the new include bean names
 	 */
@@ -374,7 +397,11 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Sets the include class names.
+	 * includeClassNames (Optional):
+	 *
+	 * Provide a list of class names that should be included. Names may be
+	 * prefixed or suffixed with a * for simple matching. The default
+	 * behavior, if no list is provided, is to include all beans.
 	 *
 	 * @param includeClassNames the new include class names
 	 */
@@ -384,7 +411,16 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 
 
 	/**
-	 * Sets the order.
+	 * order (Optional):
+	 *
+	 * As a BeanPostProcessor, we may have to play nicely with other
+	 * BeanPostProcessors also included in the spring context. Use the
+	 * order property to adjust the order in which BeanPostProcessors are
+	 * invoked by spring. When BeanPostProcessors don't set an order, the
+	 * ordering of invocation is indeterminate which may lead to unexpected
+	 * behavior and possibly errors. Therefore setting the specific order is
+	 * recommended. The most common case for Arkadiko is to be invoked last.
+	 * The default value is 20.
 	 *
 	 * @param order the new order
 	 */
@@ -393,8 +429,12 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * A class for generating proxies that must implement the newProxyInstance
-	 * as found in {@link java.lang.reflect.Proxy}.
+	 * proxyFactory (Optional):
+	 *
+	 * Provide the class name of a proxy factory class with a static method
+	 * matching the signature of "newProxyInstance" method of
+	 * java.lang.reflect.Proxy. If none is provided,
+	 * {@link java.lang.reflect.Proxy} is used.
 	 *
 	 * @param proxyFactory the proxy factory class
 	 */
@@ -403,7 +443,14 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	}
 
 	/**
-	 * Whether services must matched on the full list of bean interfaces.
+	 * strictMatching (Optional):
+	 *
+	 * If set to true, strict matching should
+	 * occur when new services are published into the framework. Strict
+	 * matches involve matching all interfaces as well as the bean.id
+	 * property. Otherwise, only a single interface (typically the primary
+	 * interface under which the service is published) and the bean.id
+	 * property must match. Default is false.
 	 *
 	 * @param strictMatching the new strict matching
 	 */
