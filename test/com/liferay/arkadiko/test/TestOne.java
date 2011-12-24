@@ -38,22 +38,18 @@ public class TestOne extends BaseTest {
 		_context.registerShutdownHook();
 	}
 
-	public void testBeanCount() {
-		assertEquals(3, _context.getBeanDefinitionCount());
-	}
-
 	public void testAKBeanPostProcessorNotNull() {
 		AKBeanPostProcessor akBeanPostProcessor =
 			(AKBeanPostProcessor)_context.getBean(
 				AKBeanPostProcessor.class.getName());
 
-		assertNotNull(akBeanPostProcessor);
+		assertNotNull("AKBeanPostProcessor is null", akBeanPostProcessor);
 	}
 
 	public void testFrameworkNotNull() {
 		Framework framework = (Framework)_context.getBean("framework");
 
-		assertNotNull(framework);
+		assertNotNull("Framework is null", framework);
 	}
 
 	@Override

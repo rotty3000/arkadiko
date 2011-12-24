@@ -15,7 +15,19 @@
 package com.liferay.arkadiko.test.util;
 
 
+import com.liferay.arkadiko.util.AKFrameworkFactory;
+
+import java.io.File;
+import java.io.FileInputStream;
+
 import junit.framework.TestCase;
+
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.launch.Framework;
+
+import org.springframework.context.support.AbstractApplicationContext;
 
 /**
  * <a href="BaseTest.java.html"><b><i>View Source</i></b></a>
@@ -26,6 +38,42 @@ public class BaseTest extends TestCase {
 
 	public String getProjectDir() {
 		return _projectDir;
+	}
+
+	public BundleContext getBundleContext(AbstractApplicationContext context) {
+		Framework framework = (Framework)context.getBean("framework");
+
+		return framework.getBundleContext();
+	}
+
+	public Bundle installAndStart(
+			AbstractApplicationContext context, String testBundleName)
+		throws Exception {
+
+		BundleContext bundleContext = getBundleContext(context);
+
+		File bundleFile = new File(getProjectDir() + testBundleName);
+
+		Bundle bundle = AKFrameworkFactory.getBundle(bundleContext, bundleFile);
+
+		if (bundle == null) {
+			try {
+				bundle = bundleContext.installBundle(
+					bundleFile.getAbsolutePath(),
+					new FileInputStream(bundleFile));
+			}
+			catch (BundleException be) {
+				be.printStackTrace();
+			}
+		}
+
+		if ((bundle.getState() != Bundle.ACTIVE) &&
+			!AKFrameworkFactory.isFragment(bundle)) {
+
+			bundle.start();
+		}
+
+		return bundle;
 	}
 
 	@Override

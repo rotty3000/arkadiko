@@ -15,16 +15,12 @@
 package com.liferay.arkadiko.test;
 
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
-import com.liferay.arkadiko.test.impl.InterfaceOneImpl;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.lang.reflect.Proxy;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.launch.Framework;
 
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -45,36 +41,30 @@ public class TestFive extends BaseTest {
 		_context.registerShutdownHook();
 	}
 
-	public void testBeanCount() {
-		assertEquals(5, _context.getBeanDefinitionCount());
-	}
+	public void testExcludeClassNames() throws Exception {
+		Bundle installedBundle = installAndStart(
+			_context, "/bundles/bundle-one/bundle-one.jar");
 
-	public void testIgnoreByName() throws Exception {
-		Framework framework = (Framework)_context.getBean("framework");
-
-		BundleContext bundleContext = framework.getBundleContext();
-
-		File bundleOne = new File(
-			getProjectDir() + "/bundles/bundle-one/bundle-one.jar");
-
-		Bundle installedBundle = bundleContext.installBundle(
-			bundleOne.getAbsolutePath(), new FileInputStream(bundleOne));
-
-		installedBundle.start();
+		InterfaceOne interfaceOne = null;
 
 		HasDependencyOnInterfaceOne bean =
 			(HasDependencyOnInterfaceOne)_context.getBean(
 				HasDependencyOnInterfaceOne.class.getName());
 
-		InterfaceOne interfaceOne = bean.getInterfaceOne();
+		try {
+			interfaceOne = bean.getInterfaceOne();
 
-		assertTrue(
-			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
+			assertFalse(
+				"interfaceOne is a proxy",
+				Proxy.isProxyClass(interfaceOne.getClass()));
+		}
+		finally {
+			installedBundle.uninstall();
+		}
 
-		installedBundle.uninstall();
-
-		assertEquals(
-			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
+		assertFalse(
+			"interfaceOne is a proxy",
+			Proxy.isProxyClass(interfaceOne.getClass()));
 	}
 
 	@Override

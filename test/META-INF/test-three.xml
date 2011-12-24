@@ -37,14 +37,14 @@
 		<property name="framework" ref="framework" />
 	</bean>
 
-	<bean id="com.liferay.arkadiko.test.impl.InterfaceOneImpl" class="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
+	<bean id="com.liferay.arkadiko.test.interfaces.InterfaceOne" class="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
-		<property name="interfaceOne" ref="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
+		<property name="interfaceOne" ref="com.liferay.arkadiko.test.interfaces.InterfaceOne" />
 	</bean>
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne_TWO" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
-		<property name="interfaceOne" ref="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
+		<property name="interfaceOne" ref="com.liferay.arkadiko.test.interfaces.InterfaceOne" />
 	</bean>
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne_THREE" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">

@@ -14,17 +14,15 @@
 
 package com.liferay.arkadiko.test;
 
+import com.liferay.arkadiko.AKServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
-import com.liferay.arkadiko.test.impl.InterfaceOneImpl;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.launch.Framework;
 
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -36,14 +34,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  */
 public class TestSix extends BaseTest {
 
-	public static void main(String[] args) throws Exception {
-		TestSix testSix = new TestSix();
-
-		testSix.setUp();
-		testSix.testIgnoreByName();
-		testSix.tearDown();
-	}
-
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -53,41 +43,102 @@ public class TestSix extends BaseTest {
 		_context.registerShutdownHook();
 	}
 
-	public void testBeanCount() {
-		assertEquals(5, _context.getBeanDefinitionCount());
-	}
-
-	public void testIgnoreByName() throws Exception {
-		Framework framework = (Framework)_context.getBean("framework");
-
-		BundleContext bundleContext = framework.getBundleContext();
-
-		File bundleOne = new File(
-			getProjectDir() + "/bundles/bundle-one/bundle-one.jar");
-
-		Bundle installedBundle = bundleContext.installBundle(
-			bundleOne.getAbsolutePath(), new FileInputStream(bundleOne));
-
-		installedBundle.start();
+	public void testLoadOSGiOnlyDepedency() throws Exception {
+		InterfaceOne interfaceOne = null;
 
 		HasDependencyOnInterfaceOne bean =
 			(HasDependencyOnInterfaceOne)_context.getBean(
 				HasDependencyOnInterfaceOne.class.getName());
 
-		InterfaceOne interfaceOne = bean.getInterfaceOne();
+		interfaceOne = bean.getInterfaceOne();
 
-		assertFalse(
-			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
+		assertTrue(
+			"interfaceOne is not a proxy",
+			Proxy.isProxyClass(interfaceOne.getClass()));
 
-		String testString = "test string";
+		InvocationHandler ih = Proxy.getInvocationHandler(interfaceOne);
 
-		interfaceOne.setValue(testString);
+		assertTrue(
+			"ih not instanceof AKServiceTrackerInvocationHandler",
+			ih instanceof AKServiceTrackerInvocationHandler);
 
-		assertEquals(interfaceOne.getValue(), testString);
+		AKServiceTrackerInvocationHandler akih =
+			(AKServiceTrackerInvocationHandler)ih;
 
-		installedBundle.uninstall();
+		assertTrue(
+			"currentService not equal to originalService",
+			akih.getCurrentService() == akih.getOriginalService());
 
 		Exception e = null;
+
+		try {
+			interfaceOne.getValue();
+		}
+		catch (Exception e1) {
+			e = e1;
+		}
+
+		assertNotNull(e);
+
+		assertTrue(e instanceof IllegalStateException);
+
+		// Install the bundle with the dependency impl
+
+		Bundle installedBundle = installAndStart(
+			_context, "/bundles/bundle-one/bundle-one.jar");
+
+		try {
+			// Test to see that the dependency impl is used
+
+			interfaceOne = bean.getInterfaceOne();
+
+			assertTrue(
+				"interfaceOne is not a proxy",
+				Proxy.isProxyClass(interfaceOne.getClass()));
+
+			ih = Proxy.getInvocationHandler(interfaceOne);
+
+			assertTrue(
+				"ih not instanceof AKServiceTrackerInvocationHandler",
+				ih instanceof AKServiceTrackerInvocationHandler);
+
+			akih = (AKServiceTrackerInvocationHandler)ih;
+
+			assertFalse(
+				"currentService is equal to originalService",
+				akih.getCurrentService() == akih.getOriginalService());
+
+			String testString = "test string";
+
+			interfaceOne.setValue(testString);
+
+			assertEquals(
+				"dependency impl returns the incorrect value",
+				interfaceOne.getValue(), testString);
+		}
+		finally {
+			installedBundle.uninstall();
+		}
+
+		interfaceOne = bean.getInterfaceOne();
+
+		assertTrue(
+			"interfaceOne is not a proxy",
+			Proxy.isProxyClass(interfaceOne.getClass()));
+
+		ih = Proxy.getInvocationHandler(interfaceOne);
+
+		assertTrue(
+			"ih not instanceof AKServiceTrackerInvocationHandler",
+			ih instanceof AKServiceTrackerInvocationHandler);
+
+		akih = (AKServiceTrackerInvocationHandler)ih;
+
+		assertTrue(
+			"currentService is equal to originalService",
+			akih.getCurrentService() == akih.getOriginalService());
+
+		e = null;
 
 		try {
 			interfaceOne.getValue();

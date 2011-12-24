@@ -14,17 +14,15 @@
 
 package com.liferay.arkadiko.test;
 
+import com.liferay.arkadiko.AKServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
-import com.liferay.arkadiko.test.impl.InterfaceOneImpl;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
 
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.launch.Framework;
 
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -45,48 +43,85 @@ public class TestTwo extends BaseTest {
 		_context.registerShutdownHook();
 	}
 
-	public void testBeanCount() {
-		assertEquals(5, _context.getBeanDefinitionCount());
-	}
-
-	public void testDefaultImplementationExists() {
-		HasDependencyOnInterfaceOne bean =
-			(HasDependencyOnInterfaceOne)_context.getBean(
-				HasDependencyOnInterfaceOne.class.getName());
-
-		InterfaceOne interfaceOne = bean.getInterfaceOne();
-
-		assertNotNull(interfaceOne);
-		assertEquals(
-			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
-	}
-
 	public void testDeployBundleWithImplementation() throws Exception {
-		Framework framework = (Framework)_context.getBean("framework");
-
-		BundleContext bundleContext = framework.getBundleContext();
-
-		File bundleOne = new File(
-			getProjectDir() + "/bundles/bundle-one/bundle-one.jar");
-
-		Bundle installedBundle = bundleContext.installBundle(
-			bundleOne.getAbsolutePath(), new FileInputStream(bundleOne));
-
-		installedBundle.start();
+		InterfaceOne interfaceOne = null;
 
 		HasDependencyOnInterfaceOne bean =
 			(HasDependencyOnInterfaceOne)_context.getBean(
 				HasDependencyOnInterfaceOne.class.getName());
 
-		InterfaceOne interfaceOne = bean.getInterfaceOne();
+		// Test if the original impl is used
 
-		assertFalse(
-			interfaceOne.methodOne().equals(InterfaceOneImpl.class.getName()));
+		interfaceOne = bean.getInterfaceOne();
 
-		installedBundle.uninstall();
+		assertTrue(
+			"interfaceOne is not a proxy",
+			Proxy.isProxyClass(interfaceOne.getClass()));
 
-		assertEquals(
-			interfaceOne.methodOne(), InterfaceOneImpl.class.getName());
+		InvocationHandler ih = Proxy.getInvocationHandler(interfaceOne);
+
+		assertTrue(
+			"ih not instanceof AKServiceTrackerInvocationHandler",
+			ih instanceof AKServiceTrackerInvocationHandler);
+
+		AKServiceTrackerInvocationHandler akih =
+			(AKServiceTrackerInvocationHandler)ih;
+
+		assertTrue(
+			"currentService not equal to originalService",
+			akih.getCurrentService() == akih.getOriginalService());
+
+		// Install the bundle with the alternative impl
+
+		Bundle installedBundle = installAndStart(
+			_context, "/bundles/bundle-one/bundle-one.jar");
+
+		try {
+			// Test that the alternative impl is used
+
+			interfaceOne = bean.getInterfaceOne();
+
+			assertTrue(
+				"interfaceOne is not a proxy",
+				Proxy.isProxyClass(interfaceOne.getClass()));
+
+			ih = Proxy.getInvocationHandler(interfaceOne);
+
+			assertTrue(
+				"ih not instanceof AKServiceTrackerInvocationHandler",
+				ih instanceof AKServiceTrackerInvocationHandler);
+
+			akih = (AKServiceTrackerInvocationHandler)ih;
+
+			assertFalse(
+				"currentService() is equal to originalService",
+				akih.getCurrentService() == akih.getOriginalService());
+		}
+		finally {
+			// Uninstall the bundle
+
+			installedBundle.uninstall();
+		}
+
+		// Test again if the original impl is used
+
+		interfaceOne = bean.getInterfaceOne();
+
+		assertTrue(
+			"interfaceOne is not a proxy",
+			Proxy.isProxyClass(interfaceOne.getClass()));
+
+		ih = Proxy.getInvocationHandler(interfaceOne);
+
+		assertTrue(
+			"ih not instanceof AKServiceTrackerInvocationHandler",
+			ih instanceof AKServiceTrackerInvocationHandler);
+
+		akih = (AKServiceTrackerInvocationHandler)ih;
+
+		assertTrue(
+			"currentService() is equal to originalService",
+			akih.getCurrentService() == akih.getOriginalService());
 	}
 
 	@Override
