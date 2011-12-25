@@ -701,6 +701,7 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		// any interfaces
 
 		if ((beanId.indexOf(AKConstants.POUND) != -1) ||
+			(beanId.equals("(inner bean)")) ||
 			interfaces.isEmpty()) {
 
 			return true;
