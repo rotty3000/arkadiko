@@ -710,8 +710,8 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		// If there are inclusion lists, and the bean is not in the lists,
 		// ignore it
 
-		if (!includeBeanByBeanName(beanId) &&
-			!includeBeanByClassName(beanId)) {
+		if (!includeBeanByBeanName(beanId) ||
+			!includeBeanByClassName(bean.getClass().getName())) {
 
 			return true;
 		}
