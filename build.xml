@@ -98,13 +98,14 @@
 			<fileset dir="${project.dir}/lib/test/equinox" includes="*.jar" />
 		</path>
 
-		<junit  printsummary="yes" fork="yes">
+		<junit printsummary="yes" fork="yes" forkmode="once">
 			<classpath refid="run-test.classpath" />
 			<sysproperty key="project.dir" value="${project.dir}" />
 			<sysproperty key="bundles.force.start" value="true" />
 			<sysproperty key="bundles.to.install" value="${framework.libs.equinox},bundles/bundle-log-adapter/bundle-log-adapter.jar" />
+			<jvmarg line="${junit.debug.jpda}" />
 
-			<batchtest fork="yes" todir="${project.dir}/reports/equinox">
+			<batchtest todir="${project.dir}/reports/equinox">
 				<formatter type="plain" extension="-equinox.txt" />
 				<fileset dir="test">
 					<include name="**/test/*Test*.java"/>
@@ -122,13 +123,14 @@
 			<fileset dir="${project.dir}/lib/test/felix" includes="*.jar" />
 		</path>
 
-		<junit  printsummary="yes" fork="yes">
+		<junit printsummary="yes" fork="yes" forkmode="once">
 			<classpath refid="run-test.classpath" />
 			<sysproperty key="project.dir" value="${project.dir}" />
 			<sysproperty key="bundles.force.start" value="true" />
 			<sysproperty key="bundles.to.install" value="${framework.libs.felix},bundles/bundle-log-adapter/bundle-log-adapter.jar" />
+			<jvmarg line="${junit.debug.jpda}" />
 
-			<batchtest fork="yes" todir="${project.dir}/reports/felix">
+			<batchtest todir="${project.dir}/reports/felix">
 				<formatter type="plain" extension="-felix.txt" />
 				<fileset dir="test">
 					<include name="**/test/*Test*.java"/>

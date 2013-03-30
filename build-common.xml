@@ -34,6 +34,15 @@
 	<taskdef classpathref="lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
 	<taskdef classpathref="test.classpath" name="junit" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"/>
 
+	<if>
+		<not>
+			<equals arg1="${junit.debug}" arg2="true" />
+		</not>
+		<then>
+			<var name="junit.debug.jpda" value="" />
+		</then>
+	</if>
+
 	<target name="clean-bundle">
 		<delete dir="classes" />
 		<delete file="${ant.project.name}.jar" />
