@@ -25,8 +25,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
@@ -95,14 +95,10 @@ public class AKFrameworkFactory {
 	public static Framework init(Map<String, String> properties)
 		throws Exception {
 
-		List<FrameworkFactory> frameworkFactories = AKServiceLoader.load(
-			FrameworkFactory.class);
+		Iterator<FrameworkFactory> iterator = ServiceLoader.load(
+			FrameworkFactory.class).iterator();
 
-		if (frameworkFactories.isEmpty()) {
-			return null;
-		}
-
-		FrameworkFactory frameworkFactory = frameworkFactories.get(0);
+		FrameworkFactory frameworkFactory = iterator.next();
 
 		Framework framework = frameworkFactory.newFramework(properties);
 
