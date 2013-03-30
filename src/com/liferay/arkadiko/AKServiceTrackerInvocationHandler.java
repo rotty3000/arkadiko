@@ -68,7 +68,7 @@ public class AKServiceTrackerInvocationHandler
 			Object[] arguments = methodInvocation.getArguments();
 
 			try {
-				return method.invoke(service, arguments);
+				method.invoke(service, arguments);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
