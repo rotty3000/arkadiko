@@ -36,6 +36,15 @@
 
 	<if>
 		<not>
+			<isset property="class" />
+		</not>
+		<then>
+			<var name="class" value="*Test*" />
+		</then>
+	</if>
+
+	<if>
+		<not>
 			<equals arg1="${junit.debug}" arg2="true" />
 		</not>
 		<then>

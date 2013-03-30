@@ -108,7 +108,7 @@
 			<batchtest todir="${project.dir}/reports/equinox">
 				<formatter type="plain" extension="-equinox.txt" />
 				<fileset dir="test">
-					<include name="**/test/*Test*.java"/>
+					<include name="**/test/${class}.java"/>
 				</fileset>
 			</batchtest>
 		</junit>
@@ -133,7 +133,7 @@
 			<batchtest todir="${project.dir}/reports/felix">
 				<formatter type="plain" extension="-felix.txt" />
 				<fileset dir="test">
-					<include name="**/test/*Test*.java"/>
+					<include name="**/test/${class}.java"/>
 				</fileset>
 			</batchtest>
 		</junit>
