@@ -84,12 +84,12 @@
 		</manifest>
 	</target>
 
-	<target name="test" depends="compile,compile-test,build-bundles">
+	<target name="test">
 		<antcall target="test-equinox" />
 		<antcall target="test-felix" />
 	</target>
 
-	<target name="test-equinox">
+	<target name="test-equinox" depends="compile,compile-test,build-bundles">
 		<mkdir dir="${project.dir}/reports/equinox" />
 
 		<path id="run-test.classpath">
@@ -114,7 +114,7 @@
 		</junit>
 	</target>
 
-	<target name="test-felix">
+	<target name="test-felix" depends="compile,compile-test,build-bundles">
 		<mkdir dir="${project.dir}/reports/felix" />
 
 		<path id="run-test.classpath">
