@@ -16,7 +16,6 @@ package com.liferay.arkadiko.osgi;
 
 import com.liferay.arkadiko.AKConstants;
 import com.liferay.arkadiko.osgi.internal.ServiceTrackerInvocationHandler;
-import com.liferay.arkadiko.bean.AKBeansException;
 import com.liferay.arkadiko.sr.ServiceRegistry;
 
 import java.lang.reflect.Proxy;
@@ -31,8 +30,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 
-import org.springframework.beans.BeansException;
-
 /**
  * <a href="OSGiServiceRegistry.java.html"><b><i>View Source</i></b></a>
  *
@@ -46,7 +43,7 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 
 	public Object createTrackingProxy(
 			Object bean, String beanName, Class<?>[] interfaces)
-		throws BeansException {
+		throws Exception {
 
 		Filter filter = createFilter(_bundleContext, beanName, interfaces);
 
@@ -56,14 +53,9 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 
 		serviceTrackerInvocationHandler.open(true);
 
-		try {
-			return Proxy.newProxyInstance(
-				getClass().getClassLoader(), interfaces,
-				serviceTrackerInvocationHandler);
-		}
-		catch (Exception e) {
-			throw new AKBeansException(e.getMessage(), e);
-		}
+		return Proxy.newProxyInstance(
+			getClass().getClassLoader(), interfaces,
+			serviceTrackerInvocationHandler);
 	}
 
 	public boolean isStrictMatching() {
@@ -142,7 +134,7 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 	protected Filter createFilter(
 			BundleContext bundleContext, String beanName,
 			Class<?>[] interfaces)
-		throws AKBeansException {
+		throws InvalidSyntaxException {
 
 		StringBuffer sb = new StringBuffer((interfaces.length * 5) + 10);
 
@@ -172,12 +164,7 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 		sb.append(AKConstants.ORIGINAL_BEAN);
 		sb.append(AKConstants.EQ_STAR_CP_CP_CP);
 
-		try {
-			return bundleContext.createFilter(sb.toString());
-		}
-		catch (InvalidSyntaxException e) {
-			throw new AKBeansException(e.getMessage(), e);
-		}
+		return bundleContext.createFilter(sb.toString());
 	}
 
 	private BundleContext _bundleContext;

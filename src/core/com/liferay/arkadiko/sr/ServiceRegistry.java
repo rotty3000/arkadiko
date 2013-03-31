@@ -14,8 +14,6 @@
 
 package com.liferay.arkadiko.sr;
 
-import org.springframework.beans.BeansException;
-
 /**
  * <a href="ServiceRegistry.java.html"><b><i>View Source</i></b></a>
  *
@@ -31,11 +29,11 @@ public interface ServiceRegistry {
 	 * @param beanName the bean id
 	 * @param interfaces the interfaces
 	 * @return the proxy
-	 * @throws BeansException the beans exception
+	 * @throws Exception
 	 */
 	public Object createTrackingProxy(
 			Object bean, String beanName, Class<?>[] interfaces)
-		throws BeansException;
+		throws Exception;
 
 	/**
 	 * Checks if is strict matching.

@@ -150,7 +150,13 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 
 		_serviceRegistry.registerBeanService(bean, beanName, interfaces);
 
-		return _serviceRegistry.createTrackingProxy(bean, beanName, interfaces);
+		try {
+			return _serviceRegistry.createTrackingProxy(
+				bean, beanName, interfaces);
+		}
+		catch (Exception e) {
+			throw new AKBeansException(e.getMessage(), e);
+		}
 	}
 
 	/**
