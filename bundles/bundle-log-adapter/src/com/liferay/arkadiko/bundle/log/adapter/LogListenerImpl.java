@@ -19,7 +19,10 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
+import java.io.InputStream;
+
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
@@ -34,6 +37,24 @@ import org.osgi.service.log.LogService;
  */
 @Component
 public class LogListenerImpl implements LogListener {
+
+	public LogListenerImpl() {
+		try {
+			Class<?> clazz = getClass();
+
+			InputStream inputStream = clazz.getResourceAsStream(
+				"/logging.properties");
+
+			if (inputStream != null) {
+				LogManager logManager = LogManager.getLogManager();
+
+				logManager.readConfiguration(inputStream);
+			}
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public void logged(LogEntry entry) {
 		Bundle bundle = entry.getBundle();
