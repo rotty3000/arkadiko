@@ -102,10 +102,29 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 			names.toArray(new String[names.size()]), bean, properties);
 	}
 
+	/**
+	 * strictMatching (Optional):
+	 *
+	 * If set to true, strict matching should occur when new services are
+	 * published into the framework. Strict matches involve matching all
+	 * interfaces as well as the bean.id property. Otherwise, only a single
+	 * interface (typically the primary interface under which the service is
+	 * published) and the bean.id property must match. Default is false.
+	 *
+	 * @param strictMatching the new strict matching
+	 */
 	public void setStrictMatching(boolean strictMatching) {
 		_strictMatching = strictMatching;
 	}
 
+	/**
+	 * extraBeanProperties (Optional):
+	 *
+	 * Provide a Map (<util:map/>) of properties to be added to beans published
+	 * to the service registry.
+	 *
+	 * @param extraBeanProperties the extra bean properties
+	 */
 	public void setExtraBeanProperties(
 		Map<String, Object> extraBeanProperties) {
 
