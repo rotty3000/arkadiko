@@ -58,6 +58,11 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 			serviceTrackerInvocationHandler);
 	}
 
+	/**
+	 * Checks if is strict matching.
+	 *
+	 * @return true, if is strict matching
+	 */
 	public boolean isStrictMatching() {
 		return _strictMatching;
 	}

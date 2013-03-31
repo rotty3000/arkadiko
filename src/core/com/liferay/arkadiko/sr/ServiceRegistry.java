@@ -36,13 +36,6 @@ public interface ServiceRegistry {
 		throws Exception;
 
 	/**
-	 * Checks if is strict matching.
-	 *
-	 * @return true, if is strict matching
-	 */
-	public boolean isStrictMatching();
-
-	/**
 	 * Register a bean as a service into the service registry.
 	 *
 	 * @param bean
