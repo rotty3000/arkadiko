@@ -15,19 +15,16 @@
 package com.liferay.arkadiko.sr;
 
 /**
- * <a href="ServiceRegistry.java.html"><b><i>View Source</i></b></a>
- *
  * @author Raymond Augé
  */
 public interface ServiceRegistry {
 
 	/**
-	 * Creates a proxy which is backed by a service tracker on the service
-	 * registry.
+	 * Creates a proxy which is backed by a service tracker.
 	 *
 	 * @param bean the bean
-	 * @param beanName the bean id
-	 * @param interfaces the interfaces
+	 * @param beanName the bean's logical name
+	 * @param interfaces the interfaces bean implements
 	 * @return the proxy
 	 * @throws Exception
 	 */
@@ -36,11 +33,11 @@ public interface ServiceRegistry {
 		throws Exception;
 
 	/**
-	 * Register a bean as a service into the service registry.
+	 * Register a bean as a service without a service tracker.
 	 *
-	 * @param bean
-	 * @param beanName
-	 * @param interfaces
+	 * @param bean the bean
+	 * @param beanName the bean's logical name
+	 * @param interfaces the interfaces the bean implements
 	 */
 	public void registerBeanService(
 		Object bean, String beanName, Class<?>[] interfaces);
