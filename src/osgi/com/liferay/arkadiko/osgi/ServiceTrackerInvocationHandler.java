@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.arkadiko;
+package com.liferay.arkadiko.osgi;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -28,38 +28,35 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * @author Raymond Augé
  */
-public class AKServiceTrackerInvocationHandler
+public class ServiceTrackerInvocationHandler
 	extends ServiceTracker implements InvocationHandler {
 
 	/**
-	 * Instantiates a new AKServiceTrackerInvocationHandler.
+	 * Instantiates a new ServiceTrackerInvocationHandler.
 	 *
-	 * @param context the context
+	 * @param bundleContext the context
 	 * @param filter the filter
 	 * @param bean the bean
 	 */
-	public AKServiceTrackerInvocationHandler(
-		BundleContext context, Filter filter, Object bean) {
+	public ServiceTrackerInvocationHandler(
+		BundleContext bundleContext, Filter filter, Object bean) {
 
-		super(context, filter, null);
+		super(bundleContext, filter, null);
 
 		_currentService = bean;
 		_originalService = bean;
 	}
 
-	/**
-	 * Adding service.
-	 *
-	 * @param reference the reference
-	 * @return the object
-	 */
 	@Override
-	public Object addingService(ServiceReference reference) {
-		Object service = context.getService(reference);
+	public Object addingService(ServiceReference serviceReference) {
+		Object service = context.getService(serviceReference);
 
 		if (service == _originalService) {
 			return service;
 		}
+
+		// TODO: Should we really do this? I'm thinking to have a wait queue
+		// similar to Blueprint
 
 		while (!_methodQueue.isEmpty()) {
 			MethodInvocation methodInvocation = _methodQueue.poll();
@@ -101,6 +98,10 @@ public class AKServiceTrackerInvocationHandler
 		throws Throwable {
 
 		if (_currentService == null) {
+
+			// TODO: Should we really do this? I'm thinking to have a wait queue
+			// similar to Blueprint
+
 			Class<?> returnType = method.getReturnType();
 
 			if (returnType.equals(Void.TYPE)) {
@@ -124,8 +125,10 @@ public class AKServiceTrackerInvocationHandler
 	}
 
 	@Override
-	public void modifiedService(ServiceReference reference, Object oldService) {
-		Object newService = context.getService(reference);
+	public void modifiedService(
+		ServiceReference serviceReference, Object oldService) {
+
+		Object newService = context.getService(serviceReference);
 
 		if (newService == _originalService) {
 			return;
@@ -134,17 +137,13 @@ public class AKServiceTrackerInvocationHandler
 		_currentService = newService;
 	}
 
-	/**
-	 * Removed service.
-	 *
-	 * @param reference the reference
-	 * @param service the service
-	 */
 	@Override
-	public void removedService(ServiceReference reference, Object service) {
+	public void removedService(
+		ServiceReference serviceReference, Object service) {
+
 		_currentService = _originalService;
 
-		context.ungetService(reference);
+		context.ungetService(serviceReference);
 	}
 
 	private Object _currentService;

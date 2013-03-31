@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,10 +14,11 @@
 
 package com.liferay.arkadiko.test;
 
-import com.liferay.arkadiko.AKBeanPostProcessor;
+import com.liferay.arkadiko.bean.AKBeanPostProcessor;
+import com.liferay.arkadiko.osgi.OSGiFrameworkFactory;
 import com.liferay.arkadiko.test.util.BaseTest;
 
-import org.osgi.framework.launch.Framework;
+import org.osgi.framework.BundleContext;
 
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -46,15 +47,18 @@ public class TestOne extends BaseTest {
 		assertNotNull("AKBeanPostProcessor is null", akBeanPostProcessor);
 	}
 
-	public void testFrameworkNotNull() {
-		Framework framework = (Framework)_context.getBean("framework");
+	public void testBundleContextNotNull() {
+		BundleContext bundleContext = (BundleContext)_context.getBean(
+			"bundleContext");
 
-		assertNotNull("Framework is null", framework);
+		assertNotNull("bundleContext is null", bundleContext);
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		_context.close();
+
+		OSGiFrameworkFactory.stop();
 
 		super.tearDown();
 	}

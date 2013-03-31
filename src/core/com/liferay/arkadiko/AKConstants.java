@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -21,8 +21,6 @@ public class AKConstants {
 
 	public static final String BEAN_ID = "bean.id";
 
-	public static final String CLASSNAME_DECORATOR = "osgi(";
-
 	public static final String CLOSE_PAREN = ")";
 
 	public static final String COMMA = ",";
@@ -34,6 +32,8 @@ public class AKConstants {
 	public static final String EQUAL = "=";
 
 	public static final String EQ_STAR_CP_CP_CP = "=*)))";
+
+	public static final String OBJECT_CLASS = "objectClass";
 
 	public static final String OPEN_PAREN = "(";
 

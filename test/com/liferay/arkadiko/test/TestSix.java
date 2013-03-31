@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,13 +14,16 @@
 
 package com.liferay.arkadiko.test;
 
-import com.liferay.arkadiko.AKServiceTrackerInvocationHandler;
+import com.liferay.arkadiko.osgi.OSGiFrameworkFactory;
+import com.liferay.arkadiko.osgi.ServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+
+import org.junit.Assert;
 
 import org.osgi.framework.Bundle;
 
@@ -60,27 +63,23 @@ public class TestSix extends BaseTest {
 
 		assertTrue(
 			"ih not instanceof AKServiceTrackerInvocationHandler",
-			ih instanceof AKServiceTrackerInvocationHandler);
+			ih instanceof ServiceTrackerInvocationHandler);
 
-		AKServiceTrackerInvocationHandler akih =
-			(AKServiceTrackerInvocationHandler)ih;
+		ServiceTrackerInvocationHandler akih =
+			(ServiceTrackerInvocationHandler)ih;
 
 		assertTrue(
 			"currentService not equal to originalService",
 			akih.getCurrentService() == akih.getOriginalService());
 
-		Exception e = null;
-
 		try {
 			interfaceOne.getValue();
-		}
-		catch (Exception e1) {
-			e = e1;
-		}
 
-		assertNotNull(e);
-
-		assertTrue(e instanceof IllegalStateException);
+			Assert.fail("Should have thrown exception");
+		}
+		catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+		}
 
 		// Install the bundle with the dependency impl
 
@@ -100,9 +99,9 @@ public class TestSix extends BaseTest {
 
 			assertTrue(
 				"ih not instanceof AKServiceTrackerInvocationHandler",
-				ih instanceof AKServiceTrackerInvocationHandler);
+				ih instanceof ServiceTrackerInvocationHandler);
 
-			akih = (AKServiceTrackerInvocationHandler)ih;
+			akih = (ServiceTrackerInvocationHandler)ih;
 
 			assertFalse(
 				"currentService is equal to originalService",
@@ -115,6 +114,9 @@ public class TestSix extends BaseTest {
 			assertEquals(
 				"dependency impl returns the incorrect value",
 				interfaceOne.getValue(), testString);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		}
 		finally {
 			installedBundle.uninstall();
@@ -130,31 +132,29 @@ public class TestSix extends BaseTest {
 
 		assertTrue(
 			"ih not instanceof AKServiceTrackerInvocationHandler",
-			ih instanceof AKServiceTrackerInvocationHandler);
+			ih instanceof ServiceTrackerInvocationHandler);
 
-		akih = (AKServiceTrackerInvocationHandler)ih;
+		akih = (ServiceTrackerInvocationHandler)ih;
 
 		assertTrue(
 			"currentService is equal to originalService",
 			akih.getCurrentService() == akih.getOriginalService());
 
-		e = null;
-
 		try {
 			interfaceOne.getValue();
-		}
-		catch (Exception e1) {
-			e = e1;
-		}
 
-		assertNotNull(e);
-
-		assertTrue(e instanceof IllegalStateException);
+			Assert.fail("Should have thrown an exception");
+		}
+		catch (Exception e) {
+			assertTrue(e instanceof IllegalStateException);
+		}
 	}
 
 	@Override
 	protected void tearDown() throws Exception {
 		_context.close();
+
+		OSGiFrameworkFactory.stop();
 
 		super.tearDown();
 	}

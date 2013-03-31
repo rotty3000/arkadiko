@@ -9,7 +9,7 @@
 >
 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
-	<bean id="framework" class="com.liferay.arkadiko.util.AKFrameworkFactory" factory-method="init" destroy-method="stop">
+	<bean id="bundleContext" class="com.liferay.arkadiko.osgi.OSGiFrameworkFactory" factory-method="init">
 		<constructor-arg>
 			<map>
 				<entry key="org.osgi.framework.bundle.parent" value="app" />
@@ -33,13 +33,15 @@
 		</constructor-arg>
 	</bean>
 
-	<bean id="com.liferay.arkadiko.AKBeanPostProcessor" class="com.liferay.arkadiko.AKBeanPostProcessor">
-		<property name="framework" ref="framework" />
+	<bean id="serviceRegistry" class="com.liferay.arkadiko.osgi.OSGiServiceRegistry">
+		<constructor-arg ref="bundleContext" />
 	</bean>
 
-	<bean id="com.liferay.arkadiko.test.interfaces.InterfaceOne" class="osgi(com.liferay.arkadiko.test.interfaces.InterfaceOne)">
-		<property name="value" value="Hello World!" />
+	<bean id="com.liferay.arkadiko.bean.AKBeanPostProcessor" class="com.liferay.arkadiko.bean.AKBeanPostProcessor">
+		<property name="serviceRegistry" ref="serviceRegistry" />
 	</bean>
+
+	<bean id="com.liferay.arkadiko.test.interfaces.InterfaceOne" class="com.liferay.arkadiko.test.interfaces.InterfaceOne" />
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
 		<property name="interfaceOne" ref="com.liferay.arkadiko.test.interfaces.InterfaceOne" />

@@ -7,25 +7,201 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
 >
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
 	<!--
-	 * com.liferay.arkadiko.util.AKFrameworkFactory:
+	 * com.liferay.arkadiko.bean.AKBeanPostProcessor:
+	 *
+	 * The key Arkadiko component is a BeanPostProcessor which provides a
+	 * means of backing the spring context with the ability to publish and
+	 * retrieve beans from an OSGi service registry. Only beans matching the
+	 * exclusion and inclusion rules are handled by the BeanPostProcessor.
+	 *
+	 * There are two ways in which a bean can be associated with an OSGi service
+	 * from the registry:
+	 *
+	 * 1) a regularly defined, matching bean is wrapped with a special proxy
+	 * which registers the bean as a service and creates a service tracker which
+	 * looks for new implementations of the service matching the generated
+	 * filter when such is deployed into the OSGi framework.
+	 *
+	 * 2) a bean defined with only an interface as it's class attribute is
+	 * provided by a proxy which registers a service tracker which looks for an
+	 * implementation deployed into the OSGi framework. This case ignores the
+	 * exclusion and inclusion rules since in a normal spring context such a
+	 * bean definition would fail.
+	-->
+	<bean
+		id="com.liferay.arkadiko.bean.AKBeanPostProcessor"
+		class="com.liferay.arkadiko.bean.AKBeanPostProcessor"
+	>
+
+		<!--
+		 * serviceRegistry (Required):
+		 *
+		 * Provide an implementation of
+		 * com.liferay.arkadiko.sr.ServiceRegistry into which the spring beans,
+		 * matching the rules below, will be published. In turn, from the
+		 * service registry will provide services that implement or override
+		 * beans that are needed or used in this spring context.
+		-->
+		<property name="serviceRegistry" ref="serviceRegistry" />
+
+		<!--
+		 * excludeBeanNames (Optional):
+		 *
+		 * Provide a list of bean names that should be excluded. Names may be
+		 * prefixed OR suffixed with a * for simple matching.
+		-->
+		<!--
+		<property name="excludeBeanNames">
+			<list>
+				<value>*Advice</value>
+			</list>
+		</property>
+		-->
+
+		<!--
+		 * excludeClassNames (Optional):
+		 *
+		 * Provide a list of class names that should be excluded. Names may be
+		 * prefixed OR suffixed with a * for simple matching.
+		-->
+		<!--
+		<property name="excludeClassNames">
+			<list>
+				<value>java.lang.*</value>
+				<value>java.util.*</value>
+			</list>
+		</property>
+		-->
+
+		<!--
+		 * includeBeanNames (Optional):
+		 *
+		 * Provide a list of bean names that should be included. Names may be
+		 * prefixed OR suffixed with a * for simple matching. The default
+		 * behavior, if no list is provided, is to include nothing.
+		-->
+		<!--
+		<property name="includeBeanNames">
+			<list>
+				<value>com.liferay.*</value>
+			</list>
+		</property>
+		-->
+
+		<!--
+		 * includeClassNames (Optional):
+		 *
+		 * Provide a list of class names that should be included. Names may be
+		 * prefixed OR suffixed with a * for simple matching. The default
+		 * behavior, if no list is provided, is to include nothing.
+		-->
+		<!--
+		<property name="includeClassNames">
+			<list>
+				<value>com.liferay.*</value>
+			</list>
+		</property>
+		-->
+
+		<!--
+		 * order (Optional):
+		 *
+		 * As a BeanPostProcessor, we may have to play nicely with other
+		 * BeanPostProcessors also included in the spring context. Use the
+		 * order property to adjust the order in which BeanPostProcessors are
+		 * invoked by spring. When BeanPostProcessors don't set an order, the
+		 * ordering of invocation is indeterminate which may lead to unexpected
+		 * behavior and possibly errors. Therefore setting the specific order is
+		 * recommended. The most common case for Arkadiko is to be invoked last.
+		 * The default value is 20.
+		-->
+		<!--
+		<property name="order">
+			<value type="java.lang.Integer">20</value>
+		</property>
+		-->
+	</bean>
+
+	<!--
+	 * com.liferay.arkadiko.sr.ServiceRegistry:
+	 *
+	 * In order to allow Arkadiko to be used in situations where an osgi
+	 * framework already exists, or where it is necessary to prevent the osgi
+	 * apis from conflicting with the runtime hosting the spring application, a
+	 * ServiceRegistry abstraction provides the functionality necessary to
+	 * support Arkadiko's bean to service mapping.
+	 *
+	 * The com.liferay.arkadiko.osgi.OSGiServiceRegistry implementation takes a
+	 * BundleContext constructor argument.
+	-->
+	<bean id="serviceRegistry" class="com.liferay.arkadiko.osgi.OSGiServiceRegistry">
+		<constructor-arg ref="bundleContext" />
+
+		<!--
+		 * extraBeanProperties (Optional):
+		 *
+		 * Provide a Map of properties you want to add to each bean published to
+		 * the framework.
+		-->
+		<!--
+		<property name="extraBeanProperties">
+			<map>
+				<entry key="service.vendor">
+					<bean
+						class="com.foo.ReleaseInfo"
+						factory-method="getVendor"
+					/>
+				</entry>
+				<entry key="service.vendor.buildDate">
+					<bean
+						class="com.foo.ReleaseInfo"
+						factory-method="getBuildDate"
+					/>
+				</entry>
+				<entry key="service.vendor.version">
+					<bean
+						class="com.foo.ReleaseInfo"
+						factory-method="getVersion"
+					/>
+				</entry>
+			</map>
+		</property>
+		-->
+
+		<!--
+		 * strictMatching (Optional):
+		 *
+		 * If set to true, strict matching should
+		 * occur when new services are published into the framework. Strict
+		 * matches involve matching all interfaces as well as the bean.id
+		 * property. Otherwise, only a single interface (typically the primary
+		 * interface under which the service is published) and the bean.id
+		 * property must match. Default is false.
+		-->
+		<!--
+		<property name="strictMatching">
+			<value>true</value>
+		</property>
+		-->
+	</bean>
+
+	<!--
+	 * com.liferay.arkadiko.osgi.OSGiFrameworkFactory:
 	 *
 	 * This is a simple implementation of a Framework factory class which will
 	 * attempt to locate and initialize a Framework instance from the
-	 * classpath.
+	 * classpath and return a BundleContext.
 	 *
-	 * The single parameter of the factory method is a
-	 * java.util.Map<String, String> object which can contain any of the
-	 * standard OSGi defined Framework properties. In addition it can contain
-	 * a few custom properties as defined below.
+	 * The single parameter of the factory method is a Map<String, String> which
+	 * can contain any of the standard OSGi defined Framework properties. In
+	 * addition it can contain a few custom properties as defined below.
 	-->
 	<bean
-		id="framework"
-		class="com.liferay.arkadiko.util.AKFrameworkFactory"
+		id="bundleContext"
+		class="com.liferay.arkadiko.osgi.OSGiFrameworkFactory"
 		factory-method="init"
-		destroy-method="stop"
 	>
 		<constructor-arg>
 			<map>
@@ -70,174 +246,5 @@
 		</constructor-arg>
 	</bean>
 
-	<bean
-		id="com.liferay.arkadiko.AKBeanPostProcessor"
-		class="com.liferay.arkadiko.AKBeanPostProcessor"
-	>
-
-		<!--
-		 * classLoader (Optional):
-		 *
-		 * The ClassLoader which will be used to create proxies around beans
-		 * in order to implement ServiceListener support. If no ClassLoader is
-		 * provided Thread.currentThread().getContextClassLoader() will be used.
-		-->
-		<!--
-		<property name="classLoader">
-			<bean
-				class="com.liferay.portal.kernel.util.PortalClassLoaderUtil"
-				factory-method="getClassLoader"
-			/>
-		</property>
-		-->
-
-		<!--
-		 * excludeBeanNames (Optional):
-		 *
-		 * Provide a list of bean names that should be excluded. Names may be
-		 * prefixed or suffixed with a * for simple matching.
-		-->
-		<!--
-		<property name="excludeBeanNames">
-			<list>
-				<value>*Advice</value>
-			</list>
-		</property>
-		-->
-
-		<!--
-		 * excludeClassNames (Optional):
-		 *
-		 * Provide a list of class names that should be excluded. Names may be
-		 * prefixed or suffixed with a * for simple matching.
-		-->
-		<!--
-		<property name="excludeClassNames">
-			<list>
-				<value>java.lang.*</value>
-				<value>java.util.*</value>
-			</list>
-		</property>
-		-->
-
-		<!--
-		 * extraBeanProperties (Optional):
-		 *
-		 * Provide a Map (<util:map/>) which specifies key=value pairs for
-		 * properties you want to add to each bean published to the framework.
-		-->
-		<!--
-		<property name="extraBeanProperties">
-			<util:map>
-				<entry key="service.vendor">
-					<bean
-						class="com.liferay.portal.kernel.util.ReleaseInfo"
-						factory-method="getVendor"
-					/>
-				</entry>
-				<entry key="service.vendor.buildDate">
-					<bean
-						class="com.liferay.portal.kernel.util.ReleaseInfo"
-						factory-method="getBuildDate"
-					/>
-				</entry>
-				<entry key="service.vendor.version">
-					<bean
-						class="com.liferay.portal.kernel.util.ReleaseInfo"
-						factory-method="getVersion"
-					/>
-				</entry>
-			</util:map>
-		</property>
-		-->
-
-		<!--
-		 * framework (Required):
-		 *
-		 * Provide an instance of org.osgi.framework.launch.Framework into which
-		 * the spring beans, matching the rules below, will be published. In
-		 * turn, from the framework it will be possible to provide services that
-		 * implement or override beans that are needed or used in this spring
-		 * context.
-		-->
-		<property name="framework" ref="framework" />
-
-		<!--
-		 * includeBeanNames (Optional):
-		 *
-		 * Provide a list of bean names that should be included. Names may be
-		 * prefixed or suffixed with a * for simple matching. The default
-		 * behavior, if no list is provided, is to include all beans.
-		-->
-		<!--
-		<property name="includeBeanNames">
-			<list>
-				<value>com.liferay.*</value>
-			</list>
-		</property>
-		-->
-
-		<!--
-		 * includeClassNames (Optional):
-		 *
-		 * Provide a list of class names that should be included. Names may be
-		 * prefixed or suffixed with a * for simple matching. The default
-		 * behavior, if no list is provided, is to include all beans.
-		-->
-		<!--
-		<property name="includeClassNames">
-			<list>
-				<value>com.liferay.*</value>
-			</list>
-		</property>
-		-->
-
-		<!--
-		 * order (Optional):
-		 *
-		 * As a BeanPostProcessor, we may have to play nicely with other
-		 * BeanPostProcessors also included in the spring context. Use the
-		 * order property to adjust the order in which BeanPostProcessors are
-		 * invoked by spring. When BeanPostProcessors don't set an order, the
-		 * ordering of invocation is indeterminate which may lead to unexpected
-		 * behavior and possibly errors. Therefore setting the specific order is
-		 * recommended. The most common case for Arkadiko is to be invoked last.
-		 * The default value is 20.
-		-->
-		<!--
-		<property name="order">
-			<value type="java.lang.Integer">20</value>
-		</property>
-		-->
-
-		<!--
-		 * proxyFactory (Optional):
-		 *
-		 * Provide the class name of a proxy factory class with a static method
-		 * matching the signature of "newProxyInstance" method of
-		 * java.lang.reflect.Proxy. If none is provided java.lang.reflect.Proxy
-		 * is used.
-		-->
-		<!--
-		<property name="proxyFactory">
-			<value type="java.lang.Class">com.liferay.portal.kernel.util.ProxyUtil</value>
-		</property>
-		-->
-
-		<!--
-		 * strictMatching (Optional):
-		 *
-		 * If set to true, strict matching should
-		 * occur when new services are published into the framework. Strict
-		 * matches involve matching all interfaces as well as the bean.id
-		 * property. Otherwise, only a single interface (typically the primary
-		 * interface under which the service is published) and the bean.id
-		 * property must match. Default is false.
-		-->
-		<!--
-		<property name="strictMatching">
-			<value>true</value>
-		</property>
-		-->
-	</bean>
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 </beans>

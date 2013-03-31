@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,6 +14,7 @@
 
 package com.liferay.arkadiko.test;
 
+import com.liferay.arkadiko.osgi.OSGiFrameworkFactory;
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
@@ -72,6 +73,8 @@ public class TestFour extends BaseTest {
 	@Override
 	protected void tearDown() throws Exception {
 		_context.close();
+
+		OSGiFrameworkFactory.stop();
 
 		super.tearDown();
 	}

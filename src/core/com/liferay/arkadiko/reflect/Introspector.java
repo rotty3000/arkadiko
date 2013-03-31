@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.arkadiko;
+package com.liferay.arkadiko.reflect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * @author Raymond Augé
  */
-public class AKIntrospector {
+public class Introspector {
 
 	/**
 	 * Gets the interfaces.

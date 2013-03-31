@@ -6,7 +6,8 @@
 	<import file="build-common.xml" />
 
 	<target name="clean">
-		<delete dir="${project.dir}/classes" />
+		<delete dir="${project.dir}/classes/core" />
+		<delete dir="${project.dir}/classes/osgi" />
 		<delete dir="${project.dir}/test-classes" />
 		<delete dir="${project.dir}/data" />
 		<delete dir="${project.dir}/dist" />
@@ -14,30 +15,59 @@
 	</target>
 
 	<target name="compile">
-		<mkdir dir="classes/META-INF" />
+		<antcall target="compile-core" />
+		<antcall target="compile-osgi" />
+	</target>
 
-		<copy file="${project.dir}/LICENSE" todir="classes/META-INF" />
+	<target name="compile-core">
+		<mkdir dir="classes/core/META-INF" />
+
+		<copy file="${project.dir}/LICENSE" todir="classes/core/META-INF" />
 
 		<javac
 			classpathref="lib.classpath"
 			compiler="${javac.compiler}"
 			debug="${javac.debug}"
 			deprecation="${javac.deprecation}"
-			destdir="classes"
+			destdir="classes/core"
 			encoding="${javac.encoding}"
 			includeAntRuntime="false"
 			nowarn="${javac.nowarn}"
-			srcdir="src"
+			srcdir="src/core"
 		/>
 	</target>
 
-	<target name="compile-test" depends="compile">
+	<target name="compile-osgi" depends="compile-core">
+		<mkdir dir="classes/osgi/META-INF" />
+
+		<copy file="${project.dir}/LICENSE" todir="classes/osgi/META-INF" />
+
+		<path id="compile-osgi.classpath">
+			<path refid="lib.classpath" />
+			<path path="classes/core"/>
+		</path>
+
+		<javac
+			classpathref="compile-osgi.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="classes/osgi"
+			encoding="${javac.encoding}"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="src/osgi"
+		/>
+	</target>
+
+	<target name="compile-test" depends="compile-osgi">
 		<mkdir dir="test-classes" />
 
 		<path id="compile-test.classpath">
 			<path refid="lib.classpath" />
 			<fileset dir="${project.dir}/lib/test" includes="ant-junit.jar,junit.jar" />
-			<path path="classes"/>
+			<path path="classes/core"/>
+			<path path="classes/osgi"/>
 		</path>
 
 		<copy todir="test-classes">
@@ -57,29 +87,61 @@
 		/>
 	</target>
 
-	<target name="jar" depends="compile">
+	<target name="jar">
+		<antcall target="jar-core" />
+		<antcall target="jar-osgi" />
+	</target>
+
+	<target name="jar-core" depends="compile-core">
 		<mkdir dir="dist" />
 
-		<antcall target="manifest" />
+		<antcall target="manifest-core" />
 
 		<jar
-			basedir="classes"
-			jarfile="dist/arkadiko-${bundle.version}-${current.time}.jar"
-			manifest="classes/META-INF/MANIFEST.MF"
+			basedir="classes/core"
+			jarfile="dist/arkadiko-core-${bundle.version}-${current.time}.jar"
+			manifest="classes/core/META-INF/MANIFEST.MF"
 		/>
 	</target>
 
-	<target name="manifest">
-		<mkdir dir="classes/META-INF" />
+	<target name="jar-osgi" depends="compile-osgi">
+		<mkdir dir="dist" />
 
-		<manifest file="classes/META-INF/MANIFEST.MF">
+		<antcall target="manifest-osgi" />
+
+		<jar
+			basedir="classes/osgi"
+			jarfile="dist/arkadiko-osgi-${bundle.version}-${current.time}.jar"
+			manifest="classes/osgi/META-INF/MANIFEST.MF"
+		/>
+	</target>
+
+	<target name="manifest-core">
+		<mkdir dir="classes/core/META-INF" />
+
+		<manifest file="classes/core/META-INF/MANIFEST.MF">
 			<attribute name="Bundle-ManifestVersion" value="2" />
-			<attribute name="Bundle-Name" value="Arkadiko" />
-			<attribute name="Bundle-SymbolicName" value="com.liferay.arkadiko" />
-			<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.5" />
+			<attribute name="Bundle-Name" value="Arkadiko Core" />
+			<attribute name="Bundle-SymbolicName" value="com.liferay.arkadiko.core" />
+			<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.6" />
 			<attribute name="Bundle-Vendor" value="Liferay, Inc." />
 			<attribute name="Bundle-Version" value="${bundle.version}" />
-			<attribute name="Export-Package" value="com.liferay.arkadiko;version=&quot;${bundle.version}&quot;" />
+			<attribute name="Export-Package" value="com.liferay.arkadiko;version=&quot;${bundle.version}&quot;,com.liferay.arkadiko.bean;version=&quot;${bundle.version}&quot;,com.liferay.arkadiko.sr;version=&quot;${bundle.version}&quot;" />
+			<attribute name="Liferay-Build-Date" value="${current.time}" />
+		</manifest>
+	</target>
+
+	<target name="manifest-osgi">
+		<mkdir dir="classes/osgi/META-INF" />
+
+		<manifest file="classes/osgi/META-INF/MANIFEST.MF">
+			<attribute name="Bundle-ManifestVersion" value="2" />
+			<attribute name="Bundle-Name" value="Arkadiko OSGi" />
+			<attribute name="Bundle-SymbolicName" value="com.liferay.arkadiko.osgi" />
+			<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.6" />
+			<attribute name="Bundle-Vendor" value="Liferay, Inc." />
+			<attribute name="Bundle-Version" value="${bundle.version}" />
+			<attribute name="Export-Package" value="com.liferay.arkadiko.osgi;version=&quot;${bundle.version}&quot;" />
 			<attribute name="Liferay-Build-Date" value="${current.time}" />
 		</manifest>
 	</target>

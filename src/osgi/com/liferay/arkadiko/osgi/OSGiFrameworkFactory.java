@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.arkadiko.util;
+package com.liferay.arkadiko.osgi;
 
 import aQute.libg.header.OSGiHeader;
 import aQute.libg.version.Version;
@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -43,15 +44,11 @@ import org.osgi.framework.launch.Framework;
 import org.osgi.framework.launch.FrameworkFactory;
 
 /**
- * <a href="FrameworkUtil.java.html"><b><i>View Source</i></b></a>
- *
  * @author Raymond Augé
  */
-public class AKFrameworkFactory {
+public class OSGiFrameworkFactory {
 
-	public static Bundle getBundle(
-		BundleContext bundleContext, File bundleFile) throws IOException {
-
+	public static Bundle getBundle(File bundleFile) throws IOException {
 		JarFile jarFile = new JarFile(bundleFile);
 
 		Manifest manifest = jarFile.getManifest();
@@ -78,7 +75,7 @@ public class AKFrameworkFactory {
 
 		Version bundleVersion = Version.parseVersion(bundleVersionAttribute);
 
-		for (Bundle bundle : bundleContext.getBundles()) {
+		for (Bundle bundle : _bundleContext.getBundles()) {
 			Version curBundleVersion = Version.parseVersion(
 				bundle.getVersion().toString());
 
@@ -92,31 +89,42 @@ public class AKFrameworkFactory {
 		return null;
 	}
 
-	public static Framework init(Map<String, String> properties)
+	public static BundleContext init(Map<String, String> properties)
 		throws Exception {
 
-		Iterator<FrameworkFactory> iterator = ServiceLoader.load(
-			FrameworkFactory.class).iterator();
+		_lock.lock();
 
-		FrameworkFactory frameworkFactory = iterator.next();
+		try {
+			if (_bundleContext != null) {
+				return _bundleContext;
+			}
 
-		Framework framework = frameworkFactory.newFramework(properties);
+			Iterator<FrameworkFactory> iterator = ServiceLoader.load(
+				FrameworkFactory.class).iterator();
 
-		framework.init();
+			FrameworkFactory frameworkFactory = iterator.next();
 
-		BundleContext bundleContext = framework.getBundleContext();
+			_framework = frameworkFactory.newFramework(properties);
 
-		bundleContext.registerService(
-			LogFactory.class, LogFactory.getFactory(),
-			new Hashtable<String, Object>());
+			_framework.init();
 
-		installBundles(bundleContext, properties);
+			_bundleContext = _framework.getBundleContext();
 
-		framework.start();
+			_bundleContext.registerService(
+				LogFactory.class, LogFactory.getFactory(),
+				new Hashtable<String, Object>());
 
-		startBundles(bundleContext, properties);
+			installBundles(properties);
 
-		return framework;
+			_framework.start();
+
+			startBundles(properties);
+
+			return _bundleContext;
+		}
+		finally {
+			_lock.unlock();
+		}
 	}
 
 	public static boolean isFragment(Bundle bundle) {
@@ -133,8 +141,21 @@ public class AKFrameworkFactory {
 		return false;
 	}
 
-	protected static void installBundles(
-			BundleContext bundleContext, Map<String, String> properties)
+	public static void stop() throws Exception {
+		_lock.lock();
+
+		try {
+			_framework.stop();
+
+			_bundleContext = null;
+			_framework = null;
+		}
+		finally {
+			_lock.unlock();
+		}
+	}
+
+	protected static void installBundles(Map<String, String> properties)
 		throws BundleException, IOException {
 
 		String projectDir = properties.get("project.dir");
@@ -145,7 +166,7 @@ public class AKFrameworkFactory {
 		for (String bundlePath : bundlePaths) {
 			File bundleFile = new File(projectDir + "/" + bundlePath.trim());
 
-			Bundle bundle = getBundle(bundleContext, bundleFile);
+			Bundle bundle = getBundle(bundleFile);
 
 			if (bundle != null) {
 				continue;
@@ -154,7 +175,7 @@ public class AKFrameworkFactory {
 			FileInputStream fileInputStream = new FileInputStream(bundleFile);
 
 			try {
-				bundleContext.installBundle(
+				_bundleContext.installBundle(
 					bundleFile.getAbsolutePath(), fileInputStream);
 			}
 			catch (BundleException be) {
@@ -166,31 +187,34 @@ public class AKFrameworkFactory {
 		}
 	}
 
-	protected static void startBundles(
-		BundleContext bundleContext, Map<String, String> properties) {
-
+	protected static void startBundles(Map<String, String> properties) {
 		String bundlesForceStart = properties.get("bundles.force.start");
 
-		if (Boolean.TRUE.toString().equals(bundlesForceStart)) {
-			Bundle[] bundles = bundleContext.getBundles();
+		if (!Boolean.TRUE.toString().equals(bundlesForceStart)) {
+			return;
+		}
 
-			for (Bundle curBundle : bundles) {
-				if ((curBundle.getState() == Bundle.ACTIVE) ||
-					isFragment(curBundle)) {
+		Bundle[] bundles = _bundleContext.getBundles();
 
-					continue;
-				}
+		for (Bundle curBundle : bundles) {
+			if (((curBundle.getState() & Bundle.ACTIVE) == Bundle.ACTIVE) ||
+				isFragment(curBundle)) {
 
-				try {
-					curBundle.start();
-				}
-				catch (Exception e) {
-					_log.error(e, e);
-				}
+				continue;
+			}
+
+			try {
+				curBundle.start();
+			}
+			catch (Exception e) {
+				_log.error(e, e);
 			}
 		}
 	}
 
-	private static Log _log = LogFactory.getLog(AKFrameworkFactory.class);
+	private static BundleContext _bundleContext;
+	private static Framework _framework;
+	private static final ReentrantLock _lock = new ReentrantLock(true);
+	private static Log _log = LogFactory.getLog(OSGiFrameworkFactory.class);
 
 }

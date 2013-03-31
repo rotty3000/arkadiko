@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -12,46 +12,46 @@
  * details.
  */
 
-package com.liferay.arkadiko;
+package com.liferay.arkadiko.bean;
 
-import java.util.ArrayList;
+import com.liferay.arkadiko.AKConstants;
+import com.liferay.arkadiko.sr.ServiceRegistry;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.osgi.framework.BundleContext;
-
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.GenericBeanDefinition;
 
 /**
  * @author Raymond Augé
  */
-public class AKBeanDefinition extends RootBeanDefinition {
+public class AKBeanDefinition extends GenericBeanDefinition {
 
 	/**
-	 * Instantiates a new aK bean definition.
+	 * Instantiates a new Arkadiko bean definition.
 	 *
 	 * @param beanPostProcessor the bean post processor
-	 * @param beanDefinition the bean definition
+	 * @param abstractBeanDefinition the bean definition
 	 * @param beanName the bean name
 	 * @param interfaces the interfaces
-	 * @param bundleContext the bundle context
+	 * @param serviceRegistry the service registry
 	 */
 	public AKBeanDefinition(
 		AKBeanPostProcessor beanPostProcessor,
-		RootBeanDefinition beanDefinition, String beanName,
-		BundleContext bundleContext) {
+		AbstractBeanDefinition abstractBeanDefinition, String beanName,
+		ServiceRegistry serviceRegistry) {
 
-		super(beanDefinition);
+		super(abstractBeanDefinition);
 
 		_beanPostProcessor = beanPostProcessor;
-		_beanDefinition = beanDefinition;
+		_abstractBeanDefinition = abstractBeanDefinition;
 		_beanName = beanName;
-		_bundleContext = bundleContext;
-		_originalClassName = beanDefinition.getBeanClassName();
+		_serviceRegistry = serviceRegistry;
+		_originalClassName = abstractBeanDefinition.getBeanClassName();
 	}
 
 	/**
@@ -62,8 +62,9 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	@Override
 	public AKBeanDefinition cloneBeanDefinition() {
 		return new AKBeanDefinition(
-			_beanPostProcessor, _beanDefinition.cloneBeanDefinition(),
-			_beanName, _bundleContext);
+			_beanPostProcessor,
+			_abstractBeanDefinition.cloneBeanDefinition(),
+			_beanName, _serviceRegistry);
 	}
 
 	/**
@@ -74,10 +75,7 @@ public class AKBeanDefinition extends RootBeanDefinition {
 	public Object getProxy() {
 		String className = _originalClassName;
 
-		if ((className == null) ||
-			!(className.startsWith(AKConstants.CLASSNAME_DECORATOR) &&
-			  className.endsWith(AKConstants.CLOSE_PAREN))) {
-
+		if (className == null) {
 			return null;
 		}
 
@@ -98,10 +96,10 @@ public class AKBeanDefinition extends RootBeanDefinition {
 		}
 
 		try {
-			List<Class<?>> interfaces = getInterfaces(className);
+			Class<?>[] interfaces = getInterfaces(className);
 
-			_proxy = _beanPostProcessor.createProxy(
-				_bundleContext, null, _beanName, interfaces);
+			_proxy = _serviceRegistry.createTrackingProxy(
+				null, _beanName, interfaces);
 
 			setBeanClass(_proxy.getClass());
 
@@ -134,38 +132,27 @@ public class AKBeanDefinition extends RootBeanDefinition {
 		return proxy.getClass();
 	}
 
-	protected List<Class<?>> getInterfaces(String className)
+	protected Class<?>[] getInterfaces(String className)
 		throws ClassNotFoundException {
 
-		className = className.substring(
-			AKConstants.CLASSNAME_DECORATOR.length(), className.length() - 1);
+		Class<?> interfaceClass = Class.forName(className);
 
-		String[] classNameParts = className.split(AKConstants.COMMA);
-
-		List<Class<?>> interfaces = new ArrayList<Class<?>>();
-
-		for (String interfaceName : classNameParts) {
-			Class<?> interfaceClass = Class.forName(interfaceName);
-
-			if (!interfaceClass.isInterface()) {
-				throw new IllegalArgumentException(
-					interfaceName + " is not an interface");
-			}
-
-			interfaces.add(interfaceClass);
+		if (!interfaceClass.isInterface()) {
+			throw new IllegalArgumentException(
+				className + " is not an interface");
 		}
 
-		return interfaces;
+		return new Class<?>[] {interfaceClass};
 	}
 
 	private static final Log _log = LogFactory.getLog(AKBeanDefinition.class);
 
-	private RootBeanDefinition _beanDefinition;
+	private AbstractBeanDefinition _abstractBeanDefinition;
 	private String _beanName;
 	private AKBeanPostProcessor _beanPostProcessor;
-	private BundleContext _bundleContext;
 	private String _originalClassName;
 	private Object _proxy;
+	private ServiceRegistry _serviceRegistry;
 
 	private static ThreadLocal<Map<String,Object>> _proxyMap =
 		new ThreadLocal<Map<String,Object>>();

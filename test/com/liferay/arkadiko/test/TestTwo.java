@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2000-2011 Liferay, Inc. All rights reserved.
+ * Copyright (c) 2000-2013 Liferay, Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free
@@ -14,7 +14,8 @@
 
 package com.liferay.arkadiko.test;
 
-import com.liferay.arkadiko.AKServiceTrackerInvocationHandler;
+import com.liferay.arkadiko.osgi.OSGiFrameworkFactory;
+import com.liferay.arkadiko.osgi.ServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;
@@ -62,10 +63,10 @@ public class TestTwo extends BaseTest {
 
 		assertTrue(
 			"ih not instanceof AKServiceTrackerInvocationHandler",
-			ih instanceof AKServiceTrackerInvocationHandler);
+			ih instanceof ServiceTrackerInvocationHandler);
 
-		AKServiceTrackerInvocationHandler akih =
-			(AKServiceTrackerInvocationHandler)ih;
+		ServiceTrackerInvocationHandler akih =
+			(ServiceTrackerInvocationHandler)ih;
 
 		assertTrue(
 			"currentService not equal to originalService",
@@ -89,9 +90,9 @@ public class TestTwo extends BaseTest {
 
 			assertTrue(
 				"ih not instanceof AKServiceTrackerInvocationHandler",
-				ih instanceof AKServiceTrackerInvocationHandler);
+				ih instanceof ServiceTrackerInvocationHandler);
 
-			akih = (AKServiceTrackerInvocationHandler)ih;
+			akih = (ServiceTrackerInvocationHandler)ih;
 
 			assertFalse(
 				"currentService() is equal to originalService",
@@ -115,9 +116,9 @@ public class TestTwo extends BaseTest {
 
 		assertTrue(
 			"ih not instanceof AKServiceTrackerInvocationHandler",
-			ih instanceof AKServiceTrackerInvocationHandler);
+			ih instanceof ServiceTrackerInvocationHandler);
 
-		akih = (AKServiceTrackerInvocationHandler)ih;
+		akih = (ServiceTrackerInvocationHandler)ih;
 
 		assertTrue(
 			"currentService() is equal to originalService",
@@ -127,6 +128,8 @@ public class TestTwo extends BaseTest {
 	@Override
 	protected void tearDown() throws Exception {
 		_context.close();
+
+		OSGiFrameworkFactory.stop();
 
 		super.tearDown();
 	}
