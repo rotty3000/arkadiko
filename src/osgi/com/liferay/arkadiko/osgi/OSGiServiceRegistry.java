@@ -15,6 +15,7 @@
 package com.liferay.arkadiko.osgi;
 
 import com.liferay.arkadiko.AKConstants;
+import com.liferay.arkadiko.osgi.internal.ServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.bean.AKBeansException;
 import com.liferay.arkadiko.sr.ServiceRegistry;
 

@@ -15,7 +15,7 @@
 package com.liferay.arkadiko.test;
 
 import com.liferay.arkadiko.osgi.OSGiFrameworkFactory;
-import com.liferay.arkadiko.osgi.ServiceTrackerInvocationHandler;
+import com.liferay.arkadiko.osgi.internal.ServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne;
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 import com.liferay.arkadiko.test.util.BaseTest;

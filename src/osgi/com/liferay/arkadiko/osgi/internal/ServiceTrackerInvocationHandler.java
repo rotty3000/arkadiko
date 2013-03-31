@@ -12,7 +12,7 @@
  * details.
  */
 
-package com.liferay.arkadiko.osgi;
+package com.liferay.arkadiko.osgi.internal;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
