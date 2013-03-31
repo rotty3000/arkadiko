@@ -29,24 +29,22 @@ Arkadiko is a small bridge between Spring and OSGi.
 
 ### How does **Arkadiko** relate to the methodologies listed above? ###
 
-Aside from the **Services First** principle, the methodologies listed above each have their own benefits and drawbacks. PojoSR does not give you access to true OSGi environment but can be a significant boon particularly during testing. I can certainly help with the unraveling of a complex application, but I argue that in spending time learning to use the library one could have spent the time with Arkadiko and gotten a few steps further in actually starting to leverage OSGi.
+Aside from the **Services First** principle (which is purely beneficial in any case), the methodologies listed above each have their own benefits and drawbacks. 
 
-In the case of the **Super Bundle**, there is no consideration for applications which do not manage their execution environment, such as web applications. In any sufficiently complex scenario if may be impossible to completely encasulate an existing application completely within an OSGi bundle without being significantly constrained or without some lose of functionality.
+**PojoSR** does not give you access to true OSGi environment but can be a significant boon particularly during testing. I can certainly help with the unraveling of a complex application, but I argue that in spending time learning to use the library one could have spent the time with Arkadiko and gotten a few steps further in actually starting to leverage OSGi more directly.
+
+In the case of the **Super Bundle**, there is no consideration for applications which do not manage their execution environment, such as web applications. Also, in many sufficiently complex scenarios it may be impossible to completely encasulate an existing application entirely within an OSGi bundle without being significantly constrained or without lose of functionality.
 
 ### How can **Arkadiko** help? ###
 
-Arkadiko is an attempt to provide an new migration option, and borrows ideas from many of the above methodologies and tries to marry into those the concepts of **Quick Wins** and **Time to Evolve**.
+Arkadiko is an attempt to provide a new migration option, and borrows ideas from many of the above methodologies and tries to marry into those the concepts of **Quick Win** and **Time to Evolve**.
 
-* **Quick Wins:** Often the light at the end of the tunnel seems awfully far away. When reviewing the scope of a complex migration, it may seem like an eternity before the benefits will pay off. 
-
-**Arkadiko gives you OSGi right now!** 
-
-How does it do that? It simply provides a means to wire an OSGi framework into your current spring container. But that in itself doesn't help and so it can also dynamically register all your beans as services and at the same time registers OSGi ServiceTrackers for beans matching specific exclusion/inclusion rules. It does this so that if matching services are published into the OSGi framework they can be automatically wired in place of those original beans. You get OSGi right away! It also means that the OSGi framework has access to all your beans and can use those as regular services.
+* **Quick Win:** Often the light at the end of the tunnel seems awfully far away. When reviewing the scope of a complex migration, it may seem like an eternity before the benefits will pay off. **Arkadiko gives you OSGi right now!** How does it do that? It simply provides a means to wire an OSGi framework into your current spring container. But that in itself doesn't help and so it can also dynamically register all your beans as services and at the same time registers OSGi ServiceTrackers for beans matching specific exclusion/inclusion rules. It does this so that if matching services are published into the OSGi framework they can be automatically wired in place of those original beans. You get OSGi right away! It also means that the OSGi framework has access to all your beans and can use those as regular services.
 
 * **Time to Evolve:** You have time to evolve your platform into OSGi as you see fit, as time allows, moving components slowly from outside the OSGi framework into the framework as re-design is completed by component, while still gaining immediate access to it's features for others. Also, those nasty libraries which have yet to be ported or are still known to not live happily inside of OSGi framework can remain outside the framework, consumed and wired from within the container, until such a time as they evolve their own OSGi solutions.
-
-Licensed under the LGPL 2.1 or later (see LICENSE).
 
 Arkadiko is very small and very simple! It only comprises a few classes.
 
 Adding Arkadiko to your existing spring configurations is as simple as adding a few beans. See the fully documented example at examples/arkadiko-spring.xml .
+
+Licensed under the LGPL 2.1 or later (see LICENSE).
