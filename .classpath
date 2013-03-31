@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="bundles/bundle-one/src"/>
 	<classpathentry kind="src" path="bundles/bundle-log-adapter/src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/biz.aQute.bnd.jar"/>
 	<classpathentry kind="lib" path="lib/org.springframework.asm-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/org.springframework.beans-3.0.5.RELEASE.jar" sourcepath="/home/rotty/DOWN/TARBALL-SRC/spring-framework-3.0.5.RELEASE/src/org.springframework.beans-sources-3.0.5.RELEASE.jar"/>
