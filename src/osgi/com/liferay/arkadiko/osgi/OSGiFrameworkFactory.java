@@ -23,7 +23,6 @@ import java.io.IOException;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -108,10 +107,6 @@ public class OSGiFrameworkFactory {
 			_framework.init();
 
 			_bundleContext = _framework.getBundleContext();
-
-			_bundleContext.registerService(
-				LogFactory.class, LogFactory.getFactory(),
-				new Hashtable<String, Object>());
 
 			installBundles(properties);
 
