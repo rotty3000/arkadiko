@@ -32,9 +32,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -179,7 +178,9 @@ public class OSGiFrameworkFactory {
 					bundleFile.getAbsolutePath(), fileInputStream);
 			}
 			catch (BundleException be) {
-				_log.error(be, be);
+				if (_log.isLoggable(Level.SEVERE)) {
+					_log.log(Level.SEVERE, be.getMessage(), be);
+				}
 			}
 			finally {
 				fileInputStream.close();
@@ -207,7 +208,9 @@ public class OSGiFrameworkFactory {
 				curBundle.start();
 			}
 			catch (Exception e) {
-				_log.error(e, e);
+				if (_log.isLoggable(Level.SEVERE)) {
+					_log.log(Level.SEVERE, e.getMessage(), e);
+				}
 			}
 		}
 	}
@@ -215,6 +218,8 @@ public class OSGiFrameworkFactory {
 	private static BundleContext _bundleContext;
 	private static Framework _framework;
 	private static final ReentrantLock _lock = new ReentrantLock(true);
-	private static Log _log = LogFactory.getLog(OSGiFrameworkFactory.class);
+
+	private static Logger _log = Logger.getLogger(
+		OSGiFrameworkFactory.class.getName());
 
 }

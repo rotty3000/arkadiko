@@ -19,9 +19,8 @@ import com.liferay.arkadiko.sr.ServiceRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
@@ -106,7 +105,9 @@ public class AKBeanDefinition extends GenericBeanDefinition {
 			_proxyMap.get().put(mapKey, _proxy);
 		}
 		catch (Exception e) {
-			_log.error(e, e);
+			if (_log.isLoggable(Level.SEVERE)) {
+				_log.log(Level.SEVERE, e.getMessage(), e);
+			}
 		}
 
 		return _proxy;
@@ -145,7 +146,8 @@ public class AKBeanDefinition extends GenericBeanDefinition {
 		return new Class<?>[] {interfaceClass};
 	}
 
-	private static final Log _log = LogFactory.getLog(AKBeanDefinition.class);
+	private static Logger _log = Logger.getLogger(
+		AKBeanDefinition.class.getName());
 
 	private AbstractBeanDefinition _abstractBeanDefinition;
 	private String _beanName;

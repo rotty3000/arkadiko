@@ -23,9 +23,8 @@ import java.lang.reflect.Method;
 
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -200,7 +199,9 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 					beanName, akBeanDefinition);
 			}
 			catch (Exception e) {
-				_log.error(e, e);
+				if (_log.isLoggable(Level.SEVERE)) {
+					_log.log(Level.SEVERE, e.getMessage(), e);
+				}
 			}
 		}
 	}
@@ -484,8 +485,8 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		return false;
 	}
 
-	private static final Log _log = LogFactory.getLog(
-		AKBeanPostProcessor.class);
+	private static Logger _log = Logger.getLogger(
+		AKBeanPostProcessor.class.getName());
 
 	private List<String> _excludeBeanNames;
 	private List<String> _excludeClassNames;

@@ -19,8 +19,8 @@ import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Deactivate;
 import aQute.bnd.annotation.component.Reference;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
@@ -40,7 +40,7 @@ public class LogListenerImpl implements LogListener {
 		int level = entry.getLevel();
 		ServiceReference<?> serviceReference = entry.getServiceReference();
 
-		Log log = _logFactory.getInstance(bundle.getSymbolicName());
+		Logger log = Logger.getLogger(bundle.getSymbolicName());
 
 		StringBuilder sb = new StringBuilder(3);
 
@@ -51,17 +51,21 @@ public class LogListenerImpl implements LogListener {
 			sb.append(serviceReference.toString());
 		}
 
-		if ((level == LogService.LOG_DEBUG) && log.isDebugEnabled()) {
-			log.debug(sb.toString(), entry.getException());
+		if ((level == LogService.LOG_DEBUG) && log.isLoggable(Level.FINE)) {
+			log.log(Level.FINE, sb.toString(), entry.getException());
 		}
-		else if ((level == LogService.LOG_ERROR) && log.isErrorEnabled()) {
-			log.error(sb.toString(), entry.getException());
+		else if ((level == LogService.LOG_ERROR) &&
+				 log.isLoggable(Level.SEVERE)) {
+
+			log.log(Level.SEVERE, sb.toString(), entry.getException());
 		}
-		else if ((level == LogService.LOG_INFO) && log.isInfoEnabled()) {
-			log.info(sb.toString(), entry.getException());
+		else if ((level == LogService.LOG_INFO) && log.isLoggable(Level.INFO)) {
+			log.log(Level.INFO, sb.toString(), entry.getException());
 		}
-		else if ((level == LogService.LOG_WARNING) && log.isWarnEnabled()) {
-			log.warn(sb.toString(), entry.getException());
+		else if ((level == LogService.LOG_WARNING) &&
+				 log.isLoggable(Level.WARNING)) {
+
+			log.log(Level.INFO, sb.toString(), entry.getException());
 		}
 	}
 
@@ -76,16 +80,10 @@ public class LogListenerImpl implements LogListener {
 	}
 
 	@Reference
-	public void setLogFactory(LogFactory logFactory) {
-		_logFactory = logFactory;
-	}
-
-	@Reference
 	public void setLogReaderService(LogReaderService logReaderService) {
 		_logReaderService = logReaderService;
 	}
 
-	private LogFactory _logFactory;
 	private LogReaderService _logReaderService;
 
 }
