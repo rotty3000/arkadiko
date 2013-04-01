@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/core"/>
 	<classpathentry kind="src" path="src/osgi"/>
+	<classpathentry kind="src" path="src/sr"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="bundles/bundle-one/src"/>
 	<classpathentry kind="src" path="bundles/bundle-log-adapter/src"/>

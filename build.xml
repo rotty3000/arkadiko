@@ -8,6 +8,7 @@
 	<target name="clean">
 		<delete dir="${project.dir}/classes/core" />
 		<delete dir="${project.dir}/classes/osgi" />
+		<delete dir="${project.dir}/classes/sr" />
 		<delete dir="${project.dir}/test-classes" />
 		<delete dir="${project.dir}/data" />
 		<delete dir="${project.dir}/dist" />
@@ -15,17 +16,23 @@
 	</target>
 
 	<target name="compile">
+		<antcall target="compile-sr" />
 		<antcall target="compile-core" />
 		<antcall target="compile-osgi" />
 	</target>
 
-	<target name="compile-core">
+	<target name="compile-core" depends="compile-sr">
 		<mkdir dir="classes/core/META-INF" />
 
 		<copy file="${project.dir}/LICENSE" todir="classes/core/META-INF" />
 
+		<path id="compile-core.classpath">
+			<path refid="lib.classpath" />
+			<path path="classes/sr"/>
+		</path>
+
 		<javac
-			classpathref="lib.classpath"
+			classpathref="compile-core.classpath"
 			compiler="${javac.compiler}"
 			debug="${javac.debug}"
 			deprecation="${javac.deprecation}"
@@ -37,14 +44,14 @@
 		/>
 	</target>
 
-	<target name="compile-osgi" depends="compile-core">
+	<target name="compile-osgi" depends="compile-sr">
 		<mkdir dir="classes/osgi/META-INF" />
 
 		<copy file="${project.dir}/LICENSE" todir="classes/osgi/META-INF" />
 
 		<path id="compile-osgi.classpath">
 			<path refid="lib.classpath" />
-			<path path="classes/core"/>
+			<path path="classes/sr"/>
 		</path>
 
 		<javac
@@ -60,12 +67,31 @@
 		/>
 	</target>
 
+	<target name="compile-sr">
+		<mkdir dir="classes/sr/META-INF" />
+
+		<copy file="${project.dir}/LICENSE" todir="classes/sr/META-INF" />
+
+		<javac
+			classpathref="lib.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="classes/sr"
+			encoding="${javac.encoding}"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="src/sr"
+		/>
+	</target>
+
 	<target name="compile-test" depends="compile-osgi">
 		<mkdir dir="test-classes" />
 
 		<path id="compile-test.classpath">
 			<path refid="lib.classpath" />
 			<fileset dir="${project.dir}/lib/test" includes="ant-junit.jar,junit.jar" />
+			<path path="classes/sr"/>
 			<path path="classes/core"/>
 			<path path="classes/osgi"/>
 		</path>
@@ -88,6 +114,7 @@
 	</target>
 
 	<target name="jar">
+		<antcall target="jar-sr" />
 		<antcall target="jar-core" />
 		<antcall target="jar-osgi" />
 	</target>
@@ -116,6 +143,18 @@
 		/>
 	</target>
 
+	<target name="jar-sr" depends="compile-sr">
+		<mkdir dir="dist" />
+
+		<antcall target="manifest-sr" />
+
+		<jar
+			basedir="classes/sr"
+			jarfile="dist/arkadiko-sr-${bundle.version}-${current.time}.jar"
+			manifest="classes/sr/META-INF/MANIFEST.MF"
+		/>
+	</target>
+
 	<target name="manifest-core">
 		<mkdir dir="classes/core/META-INF" />
 
@@ -126,7 +165,7 @@
 			<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.6" />
 			<attribute name="Bundle-Vendor" value="Liferay, Inc." />
 			<attribute name="Bundle-Version" value="${bundle.version}" />
-			<attribute name="Export-Package" value="com.liferay.arkadiko;version=&quot;${bundle.version}&quot;,com.liferay.arkadiko.bean;version=&quot;${bundle.version}&quot;,com.liferay.arkadiko.sr;version=&quot;${bundle.version}&quot;" />
+			<attribute name="Export-Package" value="com.liferay.arkadiko;version=&quot;${bundle.version}&quot;,com.liferay.arkadiko.bean;version=&quot;${bundle.version}&quot;,com.liferay.arkadiko.reflect;version=&quot;${bundle.version}&quot;" />
 			<attribute name="Liferay-Build-Date" value="${current.time}" />
 		</manifest>
 	</target>
@@ -142,6 +181,21 @@
 			<attribute name="Bundle-Vendor" value="Liferay, Inc." />
 			<attribute name="Bundle-Version" value="${bundle.version}" />
 			<attribute name="Export-Package" value="com.liferay.arkadiko.osgi;version=&quot;${bundle.version}&quot;" />
+			<attribute name="Liferay-Build-Date" value="${current.time}" />
+		</manifest>
+	</target>
+
+	<target name="manifest-sr">
+		<mkdir dir="classes/sr/META-INF" />
+
+		<manifest file="classes/sr/META-INF/MANIFEST.MF">
+			<attribute name="Bundle-ManifestVersion" value="2" />
+			<attribute name="Bundle-Name" value="Arkadiko Service Registry" />
+			<attribute name="Bundle-SymbolicName" value="com.liferay.arkadiko.sr" />
+			<attribute name="Bundle-RequiredExecutionEnvironment" value="J2SE-1.6" />
+			<attribute name="Bundle-Vendor" value="Liferay, Inc." />
+			<attribute name="Bundle-Version" value="${bundle.version}" />
+			<attribute name="Export-Package" value="com.liferay.arkadiko.sr;version=&quot;${bundle.version}&quot;" />
 			<attribute name="Liferay-Build-Date" value="${current.time}" />
 		</manifest>
 	</target>
