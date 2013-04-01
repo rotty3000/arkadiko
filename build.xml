@@ -214,7 +214,7 @@
 			<fileset dir="${project.dir}/lib/test/equinox" includes="*.jar" />
 		</path>
 
-		<junit printsummary="withOutAndErr" fork="yes" forkmode="once" showoutput="true">
+		<junit printsummary="true" fork="yes" forkmode="once">
 			<classpath refid="run-test.classpath" />
 			<sysproperty key="project.dir" value="${project.dir}" />
 			<sysproperty key="bundles.force.start" value="true" />
@@ -239,7 +239,7 @@
 			<fileset dir="${project.dir}/lib/test/felix" includes="*.jar" />
 		</path>
 
-		<junit printsummary="withOutAndErr" fork="yes" forkmode="once" showoutput="true">
+		<junit printsummary="true" fork="yes" forkmode="once">
 			<classpath refid="run-test.classpath" />
 			<sysproperty key="project.dir" value="${project.dir}" />
 			<sysproperty key="bundles.force.start" value="true" />
