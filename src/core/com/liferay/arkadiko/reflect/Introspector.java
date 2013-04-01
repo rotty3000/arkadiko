@@ -14,9 +14,9 @@
 
 package com.liferay.arkadiko.reflect;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Raymond Augé
@@ -30,19 +30,19 @@ public class Introspector {
 	 * @return the interfaces
 	 */
 	public static Class<?>[] getInterfaces(Object bean) {
-		List<Class<?>> interfaces = getInterfacesAsList(bean);
+		Set<Class<?>> interfaces = getInterfacesAsSet(bean);
 
 		return interfaces.toArray(new Class<?>[interfaces.size()]);
 	}
 
 	/**
-	 * Gets the interfaces as list.
+	 * Gets the interfaces as set.
 	 *
 	 * @param bean the bean
-	 * @return the interfaces as list
+	 * @return the interfaces as a set
 	 */
-	public static List<Class<?>> getInterfacesAsList(Object bean) {
-		List<Class<?>> interfaces = new ArrayList<Class<?>>();
+	public static Set<Class<?>> getInterfacesAsSet(Object bean) {
+		Set<Class<?>> interfaces = new HashSet<Class<?>>();
 
 		Class<?> beanClass = bean.getClass();
 
@@ -50,9 +50,7 @@ public class Introspector {
 
 		while((beanClass = beanClass.getSuperclass()) != null) {
 			for (Class<?> classInterface : beanClass.getInterfaces()) {
-				if (!interfaces.contains(classInterface)) {
-					interfaces.add(classInterface);
-				}
+				interfaces.add(classInterface);
 			}
 		}
 
