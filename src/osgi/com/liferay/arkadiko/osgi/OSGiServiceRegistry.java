@@ -14,7 +14,7 @@
 
 package com.liferay.arkadiko.osgi;
 
-import com.liferay.arkadiko.AKConstants;
+import com.liferay.arkadiko.osgi.internal.Constants;
 import com.liferay.arkadiko.osgi.internal.ServiceTrackerInvocationHandler;
 import com.liferay.arkadiko.sr.ServiceRegistry;
 
@@ -90,8 +90,8 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 
 		Hashtable<String,Object> properties = new Hashtable<String, Object>();
 
-		properties.put(AKConstants.BEAN_ID, beanName);
-		properties.put(AKConstants.ORIGINAL_BEAN, Boolean.TRUE);
+		properties.put(Constants.BEAN_ID, beanName);
+		properties.put(Constants.ORIGINAL_BEAN, Boolean.TRUE);
 
 		addExtraBeanProperties(properties);
 
@@ -143,31 +143,31 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 
 		StringBuffer sb = new StringBuffer((interfaces.length * 5) + 10);
 
-		sb.append(AKConstants.OPEN_PAREN_AND_AMP);
+		sb.append(Constants.OPEN_PAREN_AND_AMP);
 
 		if (!isStrictMatching() && (interfaces.length > 1)) {
-			sb.append(AKConstants.OPEN_PAREN_AND_PIPE);
+			sb.append(Constants.OPEN_PAREN_AND_PIPE);
 		}
 
 		for (Class<?> clazz : interfaces) {
-			sb.append(AKConstants.OPEN_PAREN);
-			sb.append(AKConstants.OBJECT_CLASS);
-			sb.append(AKConstants.EQUAL);
+			sb.append(Constants.OPEN_PAREN);
+			sb.append(Constants.OBJECT_CLASS);
+			sb.append(Constants.EQUAL);
 			sb.append(clazz.getName());
-			sb.append(AKConstants.CLOSE_PAREN);
+			sb.append(Constants.CLOSE_PAREN);
 		}
 
 		if (!isStrictMatching() && (interfaces.length > 1)) {
-			sb.append(AKConstants.CLOSE_PAREN);
+			sb.append(Constants.CLOSE_PAREN);
 		}
 
-		sb.append(AKConstants.OPEN_PAREN);
-		sb.append(AKConstants.BEAN_ID);
-		sb.append(AKConstants.EQUAL);
+		sb.append(Constants.OPEN_PAREN);
+		sb.append(Constants.BEAN_ID);
+		sb.append(Constants.EQUAL);
 		sb.append(beanName);
-		sb.append(AKConstants.CP_OP_EX_OP);
-		sb.append(AKConstants.ORIGINAL_BEAN);
-		sb.append(AKConstants.EQ_STAR_CP_CP_CP);
+		sb.append(Constants.CP_OP_EX_OP);
+		sb.append(Constants.ORIGINAL_BEAN);
+		sb.append(Constants.EQ_STAR_CP_CP_CP);
 
 		return bundleContext.createFilter(sb.toString());
 	}

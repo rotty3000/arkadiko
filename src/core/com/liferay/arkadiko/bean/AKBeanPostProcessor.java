@@ -14,7 +14,7 @@
 
 package com.liferay.arkadiko.bean;
 
-import com.liferay.arkadiko.AKConstants;
+import com.liferay.arkadiko.internal.Constants;
 import com.liferay.arkadiko.reflect.Introspector;
 import com.liferay.arkadiko.sr.ServiceRegistry;
 
@@ -320,12 +320,12 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			if (beanName.equals(excludedbeanName)) {
 				return true;
 			}
-			else if (excludedbeanName.startsWith(AKConstants.STAR) &&
+			else if (excludedbeanName.startsWith(Constants.STAR) &&
 					 beanName.endsWith(excludedbeanName.substring(1))) {
 
 				return true;
 			}
-			else if (excludedbeanName.endsWith(AKConstants.STAR) &&
+			else if (excludedbeanName.endsWith(Constants.STAR) &&
 					 beanName.startsWith(
 						 excludedbeanName.substring(
 							 0, excludedbeanName.length() - 1))) {
@@ -348,12 +348,12 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			if (className.equals(excludedClassName)) {
 				return true;
 			}
-			else if (excludedClassName.startsWith(AKConstants.STAR) &&
+			else if (excludedClassName.startsWith(Constants.STAR) &&
 					 className.endsWith(excludedClassName.substring(1))) {
 
 				return true;
 			}
-			else if (excludedClassName.endsWith(AKConstants.STAR) &&
+			else if (excludedClassName.endsWith(Constants.STAR) &&
 					 className.startsWith(
 						 excludedClassName.substring(
 							 0, excludedClassName.length() - 1))) {
@@ -414,12 +414,12 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			if (beanName.equals(includedBeanName)) {
 				return true;
 			}
-			else if (includedBeanName.startsWith(AKConstants.STAR) &&
+			else if (includedBeanName.startsWith(Constants.STAR) &&
 					 beanName.endsWith(includedBeanName.substring(1))) {
 
 				return true;
 			}
-			else if (includedBeanName.endsWith(AKConstants.STAR) &&
+			else if (includedBeanName.endsWith(Constants.STAR) &&
 					 beanName.startsWith(
 						 includedBeanName.substring(
 							 0, includedBeanName.length() - 1))) {
@@ -442,12 +442,12 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			if (className.equals(includedClassName)) {
 				return true;
 			}
-			else if (includedClassName.startsWith(AKConstants.STAR) &&
+			else if (includedClassName.startsWith(Constants.STAR) &&
 					 className.endsWith(includedClassName.substring(1))) {
 
 				return true;
 			}
-			else if (includedClassName.endsWith(AKConstants.STAR) &&
+			else if (includedClassName.endsWith(Constants.STAR) &&
 					 className.startsWith(
 						 includedClassName.substring(
 							 0, includedClassName.length() - 1))) {
@@ -473,8 +473,8 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 		// Automatically exclude anonymous beans or beans that don't implement
 		// any interfaces
 
-		if ((beanName.indexOf(AKConstants.POUND) != -1) ||
-			(beanName.equals("(inner bean)")) ||
+		if ((beanName.indexOf(Constants.POUND) != -1) ||
+			(beanName.equals(Constants.INNER_BEAN)) ||
 			(interfaces.length <= 0)) {
 
 			return true;

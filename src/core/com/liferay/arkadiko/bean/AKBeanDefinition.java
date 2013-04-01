@@ -14,7 +14,7 @@
 
 package com.liferay.arkadiko.bean;
 
-import com.liferay.arkadiko.AKConstants;
+import com.liferay.arkadiko.internal.Constants;
 import com.liferay.arkadiko.sr.ServiceRegistry;
 
 import java.util.HashMap;
@@ -82,7 +82,7 @@ public class AKBeanDefinition extends GenericBeanDefinition {
 			_proxyMap.set(new HashMap<String,Object>());
 		}
 
-		String mapKey = _beanName.concat(AKConstants.POUND).concat(className);
+		String mapKey = _beanName.concat(Constants.POUND).concat(className);
 
 		if ((_proxy == null) && _proxyMap.get().containsKey(mapKey)) {
 			_proxy = _proxyMap.get().get(mapKey);
