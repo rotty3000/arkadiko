@@ -18,8 +18,6 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import java.util.LinkedList;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
@@ -49,32 +47,9 @@ public class ServiceTrackerInvocationHandler
 
 	@Override
 	public Object addingService(ServiceReference serviceReference) {
-		Object service = context.getService(serviceReference);
+		_currentService = context.getService(serviceReference);
 
-		if (service == _originalService) {
-			return service;
-		}
-
-		// TODO: Should we really do this? I'm thinking to have a wait queue
-		// similar to Blueprint
-
-		while (!_methodQueue.isEmpty()) {
-			MethodInvocation methodInvocation = _methodQueue.poll();
-
-			Method method = methodInvocation.getMethod();
-			Object[] arguments = methodInvocation.getArguments();
-
-			try {
-				method.invoke(service, arguments);
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		_currentService = service;
-
-		return service;
+		return _currentService;
 	}
 
 	public Object getCurrentService() {
@@ -98,18 +73,6 @@ public class ServiceTrackerInvocationHandler
 		throws Throwable {
 
 		if (_currentService == null) {
-
-			// TODO: Should we really do this? I'm thinking to have a wait queue
-			// similar to Blueprint
-
-			Class<?> returnType = method.getReturnType();
-
-			if (returnType.equals(Void.TYPE)) {
-				_methodQueue.push(new MethodInvocation(method, arguments));
-
-				return null;
-			}
-
 			throw new IllegalStateException("called too early!");
 		}
 
@@ -119,22 +82,13 @@ public class ServiceTrackerInvocationHandler
 		catch (InvocationTargetException ite) {
 			throw ite.getCause();
 		}
-		catch (Exception e) {
-			throw e;
-		}
 	}
 
 	@Override
 	public void modifiedService(
 		ServiceReference serviceReference, Object oldService) {
 
-		Object newService = context.getService(serviceReference);
-
-		if (newService == _originalService) {
-			return;
-		}
-
-		_currentService = newService;
+		_currentService = context.getService(serviceReference);
 	}
 
 	@Override
@@ -148,27 +102,5 @@ public class ServiceTrackerInvocationHandler
 
 	private Object _currentService;
 	private Object _originalService;
-	private LinkedList<MethodInvocation> _methodQueue =
-		new LinkedList<MethodInvocation>();
-
-	private class MethodInvocation {
-
-		public MethodInvocation(Method method, Object[] arguments) {
-			_method = method;
-			_arguments = arguments;
-		}
-
-		public Object[] getArguments() {
-			return _arguments;
-		}
-
-		public Method getMethod() {
-			return _method;
-		}
-
-		private Method _method;
-		private Object[] _arguments;
-
-	}
 
 }
