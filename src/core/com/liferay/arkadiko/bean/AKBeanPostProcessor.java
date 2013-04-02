@@ -29,10 +29,13 @@ import java.util.logging.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.beans.factory.support.AutowireCandidateResolver;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
@@ -177,6 +180,12 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			(DefaultListableBeanFactory)beanFactory;
 
 		defaultListableBeanFactory.setInstantiationStrategy(this);
+
+		AutowireCandidateResolver autowireCandidateResolver =
+			defaultListableBeanFactory.getAutowireCandidateResolver();
+
+		defaultListableBeanFactory.setAutowireCandidateResolver(
+			new AKAutowireCandidateResolver(autowireCandidateResolver));
 
 		for (String beanName :
 				defaultListableBeanFactory.getBeanDefinitionNames()) {
@@ -500,5 +509,49 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	private List<String> _includeClassNames;
 	private int _order = 20;
 	private ServiceRegistry _serviceRegistry;
+
+	private class AKAutowireCandidateResolver
+		implements AutowireCandidateResolver {
+
+		AKAutowireCandidateResolver(
+			AutowireCandidateResolver autowireCandidateResolver) {
+
+			_autowireCandidateResolver = autowireCandidateResolver;
+		}
+
+		@Override
+		public boolean isAutowireCandidate(
+			BeanDefinitionHolder beanDefinitionHolder, DependencyDescriptor descriptor) {
+
+			return _autowireCandidateResolver.isAutowireCandidate(
+				beanDefinitionHolder, descriptor);
+		}
+
+		@Override
+		public Object getSuggestedValue(DependencyDescriptor descriptor) {
+			Object service = _autowireCandidateResolver.getSuggestedValue(
+				descriptor);
+
+			if (service != null) {
+				return service;
+			}
+
+			try {
+				return _serviceRegistry.createTrackingProxy(
+					null, descriptor.getDependencyName(),
+					new Class<?>[] {descriptor.getDependencyType()});
+			}
+			catch (Exception e) {
+				if (_log.isLoggable(Level.SEVERE)) {
+					_log.log(Level.SEVERE, e.getMessage(), e);
+				}
+			}
+
+			return null;
+		}
+
+		private AutowireCandidateResolver _autowireCandidateResolver;
+
+	}
 
 }
