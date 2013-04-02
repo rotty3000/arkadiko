@@ -41,19 +41,19 @@
 		<property name="serviceRegistry" ref="serviceRegistry" />
 		<property name="includeBeanNames">
 			<list>
-				<value>com.liferay.arkadiko.test.interfaces.InterfaceOne</value>
+				<value>interfaceOne</value>
 			</list>
 		</property>
 	</bean>
 
-	<bean id="com.liferay.arkadiko.test.interfaces.InterfaceOne" class="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
+	<bean id="interfaceOne" class="com.liferay.arkadiko.test.impl.InterfaceOneImpl" />
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
-		<property name="interfaceOne" ref="com.liferay.arkadiko.test.interfaces.InterfaceOne" />
+		<property name="interfaceOne" ref="interfaceOne" />
 	</bean>
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne_TWO" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
-		<property name="interfaceOne" ref="com.liferay.arkadiko.test.interfaces.InterfaceOne" />
+		<property name="interfaceOne" ref="interfaceOne" />
 	</bean>
 
 	<bean id="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne_THREE" class="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne">
