@@ -9,9 +9,9 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="lib" path="lib/biz.aQute.bnd.jar"/>
 	<classpathentry kind="lib" path="lib/org.springframework.asm-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/org.springframework.beans-3.0.5.RELEASE.jar" sourcepath="/home/rotty/DOWN/TARBALL-SRC/spring-framework-3.0.5.RELEASE/src/org.springframework.beans-sources-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/org.springframework.context-3.0.5.RELEASE.jar" sourcepath="/home/rotty/DOWN/TARBALL-SRC/spring-framework-3.0.5.RELEASE/src/org.springframework.context-sources-3.0.5.RELEASE.jar"/>
-	<classpathentry kind="lib" path="lib/org.springframework.core-3.0.5.RELEASE.jar" sourcepath="/home/rotty/DOWN/TARBALL-SRC/spring-framework-3.0.5.RELEASE/src/org.springframework.core-sources-3.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.beans-3.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.context-3.0.5.RELEASE.jar"/>
+	<classpathentry kind="lib" path="lib/org.springframework.core-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/org.springframework.expression-3.0.5.RELEASE.jar"/>
 	<classpathentry kind="lib" path="lib/osgi.cmpn.jar"/>
 	<classpathentry kind="lib" path="lib/osgi.core.jar"/>
