@@ -480,15 +480,15 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			return true;
 		}
 
-		if ((excludeBeanByBeanName(beanName) ||
-			 excludeBeanByClassName(beanClass)) &&
-			(!includeBeanByBeanName(beanName) ||
-			 !includeBeanByClassName(beanClass))) {
+		if (!excludeBeanByBeanName(beanName) &&
+			!excludeBeanByClassName(beanClass) &&
+			(includeBeanByBeanName(beanName) ||
+			 includeBeanByClassName(beanClass))) {
 
-			return true;
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	private static Logger _log = Logger.getLogger(
