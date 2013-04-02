@@ -23,7 +23,7 @@ import com.liferay.arkadiko.test.interfaces.InterfaceOne;
  *
  * @author Raymond Augé
  */
-@Component
+@Component(properties = {"bean.id=interfaceOne"})
 public class BundleOneInterfaceOneImpl implements InterfaceOne {
 
 	public String getValue() {

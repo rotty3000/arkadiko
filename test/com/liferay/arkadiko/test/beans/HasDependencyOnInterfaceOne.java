@@ -16,11 +16,15 @@ package com.liferay.arkadiko.test.beans;
 
 import com.liferay.arkadiko.test.interfaces.InterfaceOne;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * <a href="HasDependencyOnInterfaceOne.java.html"><b><i>View Source</i></b></a>
  *
  * @author Raymond Augé
  */
+@Component(value="com.liferay.arkadiko.test.beans.HasDependencyOnInterfaceOne")
 public class HasDependencyOnInterfaceOne {
 
 	public void useInterfaceOne() {
@@ -37,6 +41,7 @@ public class HasDependencyOnInterfaceOne {
 	/**
 	 * @param interfaceOne the interfaceOne to set
 	 */
+	@Autowired
 	public void setInterfaceOne(InterfaceOne interfaceOne) {
 		_interfaceOne = interfaceOne;
 	}
