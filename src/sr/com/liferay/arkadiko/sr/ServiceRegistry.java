@@ -20,26 +20,20 @@ package com.liferay.arkadiko.sr;
 public interface ServiceRegistry {
 
 	/**
-	 * Creates a proxy which is backed by a service tracker.
+	 * Register a bean as a service. If trackService is true a service tracker
+	 * for the bean which is returned wrapped in a proxy. Otherwise the bean is
+	 * directly returned.
 	 *
 	 * @param bean the bean
 	 * @param beanName the bean's logical name
 	 * @param interfaces the interfaces bean implements
-	 * @return the proxy
+	 * @param trackService whether to track the service or not
+	 * @return the bean, or a tracking proxy
 	 * @throws Exception
 	 */
-	public Object createTrackingProxy(
-			Object bean, String beanName, Class<?>[] interfaces)
+	public Object registerBeanAsService(
+			Object bean, String beanName, Class<?>[] interfaces,
+			boolean trackService)
 		throws Exception;
-
-	/**
-	 * Register a bean as a service without a service tracker.
-	 *
-	 * @param bean the bean
-	 * @param beanName the bean's logical name
-	 * @param interfaces the interfaces the bean implements
-	 */
-	public void registerBeanService(
-		Object bean, String beanName, Class<?>[] interfaces);
 
 }

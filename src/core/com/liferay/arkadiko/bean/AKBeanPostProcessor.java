@@ -151,11 +151,9 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			return bean;
 		}
 
-		_serviceRegistry.registerBeanService(bean, beanName, interfaces);
-
 		try {
-			return _serviceRegistry.createTrackingProxy(
-				bean, beanName, interfaces);
+			return _serviceRegistry.registerBeanAsService(
+				bean, beanName, interfaces, _trackService);
 		}
 		catch (Exception e) {
 			throw new AKBeansException(e.getMessage(), e);
@@ -316,6 +314,18 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	 */
 	public void setServiceRegistry(ServiceRegistry serviceRegistry) {
 		_serviceRegistry = serviceRegistry;
+	}
+
+	/**
+	 * trackService (Optional):
+	 *
+	 * Whether to only register matching beans as services or to also create
+	 * trackers for them.
+	 *
+	 * @param trackService only register as a service or also track
+	 */
+	public void setTrackService(boolean trackService) {
+		_trackService = trackService;
 	}
 
 	/**
@@ -508,6 +518,7 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 	private List<String> _includeBeanNames;
 	private List<String> _includeClassNames;
 	private int _order = 20;
+	private boolean _trackService = true;
 	private ServiceRegistry _serviceRegistry;
 
 	private class AKAutowireCandidateResolver
@@ -536,9 +547,9 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			}
 
 			try {
-				return _serviceRegistry.createTrackingProxy(
+				return _serviceRegistry.registerBeanAsService(
 					null, descriptor.getDependencyName(),
-					new Class<?>[] {descriptor.getDependencyType()});
+					new Class<?>[] {descriptor.getDependencyType()}, true);
 			}
 			catch (Exception e) {
 				if (_log.isLoggable(Level.SEVERE)) {

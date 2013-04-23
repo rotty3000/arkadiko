@@ -41,9 +41,53 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 		_bundleContext = bundleContext;
 	}
 
-	public Object createTrackingProxy(
-			Object bean, String beanName, Class<?>[] interfaces)
-		throws Exception {
+	public Map<String, Object> getExtraBeanProperties() {
+		if (_extraBeanProperties == null) {
+			_extraBeanProperties = Collections.emptyMap();
+		}
+
+		return _extraBeanProperties;
+	}
+
+	/**
+	 * Checks if is strict matching.
+	 *
+	 * @return true, if is strict matching
+	 */
+	public boolean isStrictMatching() {
+		return _strictMatching;
+	}
+
+	public Object registerBeanAsService(
+		Object bean, String beanName, Class<?>[] interfaces,
+		boolean trackService) throws Exception {
+
+		if (interfaces.length <= 0) {
+			return bean;
+		}
+
+		List<String> names = new ArrayList<String>();
+
+		for (Class<?> interfaceClass : interfaces) {
+			names.add(interfaceClass.getName());
+		}
+
+		if (bean != null) {
+			Hashtable<String,Object> properties =
+				new Hashtable<String, Object>();
+
+			properties.put(Constants.BEAN_ID, beanName);
+			properties.put(Constants.ORIGINAL_BEAN, Boolean.TRUE);
+
+			addExtraBeanProperties(properties);
+
+			_bundleContext.registerService(
+				names.toArray(new String[names.size()]), bean, properties);
+		}
+
+		if (!trackService) {
+			return bean;
+		}
 
 		Filter filter = createFilter(_bundleContext, beanName, interfaces);
 
@@ -56,47 +100,6 @@ public class OSGiServiceRegistry implements ServiceRegistry {
 		return Proxy.newProxyInstance(
 			getClass().getClassLoader(), interfaces,
 			serviceTrackerInvocationHandler);
-	}
-
-	/**
-	 * Checks if is strict matching.
-	 *
-	 * @return true, if is strict matching
-	 */
-	public boolean isStrictMatching() {
-		return _strictMatching;
-	}
-
-	public Map<String, Object> getExtraBeanProperties() {
-		if (_extraBeanProperties == null) {
-			_extraBeanProperties = Collections.emptyMap();
-		}
-
-		return _extraBeanProperties;
-	}
-
-	public void registerBeanService(
-		Object bean, String beanName, Class<?>[] interfaces) {
-
-		if (interfaces.length <= 0) {
-			return;
-		}
-
-		List<String> names = new ArrayList<String>();
-
-		for (Class<?> interfaceClass : interfaces) {
-			names.add(interfaceClass.getName());
-		}
-
-		Hashtable<String,Object> properties = new Hashtable<String, Object>();
-
-		properties.put(Constants.BEAN_ID, beanName);
-		properties.put(Constants.ORIGINAL_BEAN, Boolean.TRUE);
-
-		addExtraBeanProperties(properties);
-
-		_bundleContext.registerService(
-			names.toArray(new String[names.size()]), bean, properties);
 	}
 
 	/**

@@ -97,8 +97,8 @@ public class AKBeanDefinition extends GenericBeanDefinition {
 		try {
 			Class<?>[] interfaces = getInterfaces(className);
 
-			_proxy = _serviceRegistry.createTrackingProxy(
-				null, _beanName, interfaces);
+			_proxy = _serviceRegistry.registerBeanAsService(
+				null, _beanName, interfaces, true);
 
 			setBeanClass(_proxy.getClass());
 
