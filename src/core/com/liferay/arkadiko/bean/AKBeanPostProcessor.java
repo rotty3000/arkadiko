@@ -519,15 +519,14 @@ public class AKBeanPostProcessor extends SimpleInstantiationStrategy
 			_autowireCandidateResolver = autowireCandidateResolver;
 		}
 
-		@Override
 		public boolean isAutowireCandidate(
-			BeanDefinitionHolder beanDefinitionHolder, DependencyDescriptor descriptor) {
+			BeanDefinitionHolder beanDefinitionHolder,
+			DependencyDescriptor descriptor) {
 
 			return _autowireCandidateResolver.isAutowireCandidate(
 				beanDefinitionHolder, descriptor);
 		}
 
-		@Override
 		public Object getSuggestedValue(DependencyDescriptor descriptor) {
 			Object service = _autowireCandidateResolver.getSuggestedValue(
 				descriptor);
